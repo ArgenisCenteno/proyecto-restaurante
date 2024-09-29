@@ -1,0 +1,195 @@
+@page {
+    margin: 0px 10px;
+}
+
+p {
+    font-size: 0.65rem;
+}
+
+.p-small {
+    font-size: 0.6rem;
+}
+
+body {
+    margin-top: 0.5cm;
+    margin-left: 1cm;
+    margin-right: 2cm;
+    margin-bottom: 1cm;
+}
+.tabla{
+    background: url(../logo/escudo.png);
+}
+.encabezado{
+    font-family: 'Monserrat', sans-serif;
+    font-style: bold 600, italic;
+
+}
+
+.bg-blue {
+    background-color: #072a54;
+}
+tr:first-child,
+th:first-child {
+  border-radius: 15px 0 0 0px;
+}
+tr:last-child,
+th:last-child {
+  border-radius: 0 15px 0px 0;
+}
+
+.icono{
+    background-color: none;
+    border-right: 3px solid #072a54;
+    padding: 15px;
+}
+
+.bold {
+    font-family: 'Monserrat', sans-serif;
+    font-weight: 700;
+}
+
+.fecha{
+    font-family: 'Monserrat', sans-serif;
+    font-weight: 300;
+}
+.normal {
+    font-weight: normal;
+}
+
+.text-end {
+    text-align: right !important;
+}
+
+.round {
+    border-radius: 10px;
+}
+
+.round-bottom {
+    border-radius: 0% 0% 10px 10px;
+}
+
+.round-top {
+    border-radius: 10px 10px 0% 0%;
+}
+
+.border-0 {
+    border-width: 0 !important;
+}
+
+.border-1 {
+    border-width: 1px !important;
+}
+
+.border-2 {
+    border-width: 2px !important;
+}
+
+.border-3 {
+    border-width: 3px !important;
+}
+
+.denominacion{
+    font-family: 'Monserrat', sans-serif;
+    font-weight: normal, 600;
+}
+
+.align-middle {
+    vertical-align: middle !important;
+    font-family:'Monserrat', sans-serif;
+    font-weight: normal, 500;
+
+}
+
+.text-align-justify {
+    text-align: justify;
+}
+
+.bg-orange {
+    background-color: #fd7e14;
+}
+
+.barra > img{
+    position: relative;
+    right: 30px;
+    background-color: #0e50a1;
+    height: 30px;
+    width: 50rem;
+}
+.subir{
+    margin-top: -20px;
+}
+.border-bottom-orange{
+
+}
+.tablaa{
+    background: url("../image/fondo@72x.png");
+}
+
+/* Salto de pagina */
+.page-break {
+    page-break-after: always;
+}
+
+.table-borderless tbody+tbody,
+.table-borderless td,
+.table-borderless th,
+.table-borderless thead th {
+    border: 0;
+}
+
+      #watermark {
+                position: fixed;
+                bottom:   0px;
+                left:     0px;
+                /** El ancho y la altura pueden cambiar
+                    según las dimensiones de su membrete
+                **/
+                width:    21.8cm;
+                height:   28cm;
+
+                /* Tu marca de agua debe estar detrás de cada contenido */
+                z-index:  -1000;
+            }
+
+
+            /* fondos de pdf de solvencias y licencias*/
+.Solvencia{
+    background: url("../image/fondo@72x.png");
+}
+
+.SolvenciaTabla{
+    /* background:url(");} */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 75%;
+}
+
+.encabezadosolvencia{
+    font-family: 'Monserrat', sans-serif;
+    font-style: 300, italic;
+}
+.primeratabla{
+    background:  #0e50a1;
+    color: #fff;
+    border-radius: 20px;
+}
+.aaa{
+    position: absolute;
+    padding-left: 23px;
+    padding-top: 8px;
+}
+.aaaa{
+    position: absolute;
+    padding-left: 14px;
+    padding-top: ;
+
+}
+.aaaaa{
+    position: absolute;
+    padding-left: 18px;
+    padding-top: 3px;
+
+}
+h6{
+    font-size: 14px;
+}
