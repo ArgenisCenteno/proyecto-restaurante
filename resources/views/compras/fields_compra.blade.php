@@ -31,13 +31,13 @@
 
                 <input type="radio" data-mdb-ripple-init class="btn-check" name="options" id="option2"
                     autocomplete="off" checked />
-                <label data-mdb-ripple-init class="bg-dark w-100 p-4  text-white" for="option2">
+                <label data-mdb-ripple-init class="bg-dark w-100 p-4 mt-3  text-white" for="option2">
                     <div class="d-flex justify-content-between">
                         <span><i class="fas fa-user "></i> Empleado </span>
                         <span>{{auth()->user()->name}}</span>
                     </div>
                 </label>
-              <label for="Cliente"> <i class="fas fa-user text-success"></i> Proveedor</label>
+              <label for="Cliente"> <i class="fas fa-user text-success mt-3"></i> Proveedor</label>
               <select name="user_id" id="user_id" class="form-control select2 mb-2 mt-2">
                 <option value="">Seleccione una opción</option>
                     @foreach($users as $id => $name)
@@ -51,13 +51,14 @@
                
                 <div class="row g-3">
                     <div class="col-md-12">
-                        <label for=""><i class="fas fa-cash-register text-success"></i> Forma de Pago</label>
+                        <label for=""><i class="fas fa-cash-register text-success mt-3"></i> Forma de Pago</label>
                         <select class="form-select" id="metodoPago" name="metodoPago">
                             <option value="Efectivo">Efectivo</option>
                             <option value="Transferencia">Transferencia</option>
                             <option value="Pago Movil">Pago Móvil</option>
                             <option value="Divisa">Divisa</option>
                             <option value="Punto de Venta">Punto de Venta</option>
+                            <option value="A credito">A credito</option>
                         </select>
                     </div>
                    

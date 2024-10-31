@@ -37,7 +37,7 @@
                         <span>{{auth()->user()->name}}</span>
                     </div>
                 </label>
-              <label for="Cliente"> <i class="fas fa-user text-success"></i> Cliente</label>
+              <label for="Cliente"> <i class="fas fa-user text-success mt-3"></i> Cliente</label>
                 <select name="user_id" id="user_id" class="form-control select2 mb-2 mt-2">
                     @foreach($users as $id => $name)
                         <option value="{{ $id }}">{{ $name }}</option>
@@ -48,7 +48,7 @@
             </div>
             <div id="metodosPagoContainer">
                
-                <div class="row g-3">
+                <div class="row g-3 mt-3">
                     <div class="col-md-12">
                         <label for=""><i class="fas fa-cash-register text-success"></i> Forma de Pago</label>
                         <select class="form-select" id="metodoPago" name="metodoPago">
@@ -57,12 +57,13 @@
                             <option value="Pago Movil">Pago Móvil</option>
                             <option value="Divisa">Divisa</option>
                             <option value="Punto de Venta">Punto de Venta</option>
+                            <option value="A credito">A credito</option>
                         </select>
                     </div>
                    
                 </div>
 
-                <div class="row g-3">
+                <div class="row g-3 mt-3">
                     <div class="col-md-12">
                         <label for=""><i class="fas fa-table text-success"></i> Mesa</label>
                         <select class="form-select" id="Mesa" name="mesa">
@@ -70,7 +71,7 @@
                             <option value="Mesa 2">Mesa 2</option>
                             <option value="Mesa 3">Mesa 3</option>
                             <option value="Mesa 4">Mesa 4</option>
-                            <option value="Mesa 5">Mesa 3</option>
+                            <option value="Mesa 5">Mesa 5</option>
                         </select>
                     </div>
                    

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Caja;
+use App\Models\CuentaPorCobrar;
 use App\Models\DetalleVenta;
+use App\Models\Movimiento;
 use App\Models\Pago;
 use App\Models\Producto;
 use App\Models\Recibo;
@@ -28,45 +30,45 @@ class VentaController extends Controller
             $data = Venta::with(['user', 'vendedor', 'pago'])->get();
             return DataTables::of($data)
                 ->addIndexColumn()
-                ->addColumn('user', function($row) {
+                ->addColumn('user', function ($row) {
                     return $row->user->name;
                 })
-                ->addColumn('vendedor', function($row) {
+                ->addColumn('vendedor', function ($row) {
                     return $row->vendedor->name ?? 'S/D';
                 })
-                ->addColumn('monto_neto', function($row) {
+                ->addColumn('monto_neto', function ($row) {
                     return number_format($row->pago->monto_neto, 2);
                 })
-                ->addColumn('monto_total', function($row) {
+                ->addColumn('monto_total', function ($row) {
                     return number_format($row->pago->monto_total, 2);
                 })
-                ->addColumn('fecha', function($row) {
+                ->addColumn('fecha', function ($row) {
                     return $row->created_at->format('Y-m-d'); // Ajusta el formato de fecha aquí
                 })
-                ->addColumn('status', function($row) {
+                ->addColumn('status', function ($row) {
                     $status = $row->pago->status;
                     $class = $status == 'Pagado' ? 'success' : 'danger'; // Clase basada en el estado
                     return '<span class="badge bg-' . $class . '">' . $status . '</span>';
                 })
-                ->addColumn('actions', function($row) {
+                ->addColumn('actions', function ($row) {
                     $viewUrl = route('ventas.show', $row->id);
                     $deleteUrl = route('ventas.destroy', $row->id);
                     $pdfUrl = route('ventas.pdf', $row->id); // Asegúrate de que la ruta esté correcta
                     return '
-                            <a href="'.$pdfUrl.'" class="btn btn-success btn-sm" target="_blank">Recibo</a>
-                           <form action="'.$deleteUrl.'"  method="POST" style="display:inline; " class="btn-delete">
-                            '.csrf_field().'
-                            '.method_field('DELETE').'
+                            <a href="' . $pdfUrl . '" class="btn btn-success btn-sm" target="_blank">Recibo</a>
+                           <form action="' . $deleteUrl . '"  method="POST" style="display:inline; " class="btn-delete">
+                            ' . csrf_field() . '
+                            ' . method_field('DELETE') . '
                             <button type="submit" class="btn btn-danger btn-sm " >Eliminar</button>
                         </form>';
                 })
                 ->rawColumns(['status', 'actions'])
                 ->make(true);
         }
-    
+
         return view('ventas.index');
     }
-    
+
 
     /**
      * Show the form for creating a new resource.
@@ -87,7 +89,7 @@ class VentaController extends Controller
     /**
      * Display the specified resource.
      */
-  
+
     public function edit(string $id)
     {
         //
@@ -101,7 +103,7 @@ class VentaController extends Controller
         //
     }
 
-   
+
 
     public function vender(Request $request)
     {
@@ -190,8 +192,28 @@ class VentaController extends Controller
 
         //registrar pago
 
+        if ($request->metodoPago != 'A credito') {
+            $estatus = 'Pagado';
+        } else {
+            $estatus = 'Pendiente';
+
+            $deuda = new CuentaPorCobrar();
+            
+            $deuda->user_id = $request->user_id;
+            $deuda->tipo = "Pago de servicio";
+            $deuda->descripcion = "Pago por consumo de comida en establecimiento por un monto de " . number_format($montoTotal, 2, ',', '.') . " BS."; 
+            
+            $deuda->monto = $montoTotal;
+            $deuda->estado = $estatus;
+            
+            $deuda->save();
+            
+        }
+
+
+
         $pago = new Pago();
-        $pago->status = 'Pagado';
+        $pago->status = $estatus;
         $pago->tipo = 'Venta';
         $pago->forma_pago = $request->metodoPago;
         $pago->monto_total = $montoTotal;
@@ -207,7 +229,7 @@ class VentaController extends Controller
         $venta->user_id = $request->user_id;
         $venta->vendedor_id = $userId;
         $venta->monto_total = $montoTotal;
-        $venta->status = 'Pagado';
+        $venta->status = $estatus;
         $venta->pago_id = $pago->id;
         $venta->mesa = $request->mesa;
         $venta->mesa = $request->mesa;
@@ -238,7 +260,7 @@ class VentaController extends Controller
         $recibo = new Recibo();
         $recibo->tipo = 'Venta';
         $recibo->monto = $montoTotal;
-        $recibo->estatus = 'Pagado';
+        $recibo->estatus = $estatus;
         $recibo->pago_id = $pago->id;
         $recibo->user_id = $request->user_id;
         $recibo->activo = 1;
@@ -247,8 +269,27 @@ class VentaController extends Controller
         $recibo->save();
 
         //caja
+        $caja =  Caja::find(1);
+        $movimiento = new Movimiento();
 
-       
+        $movimiento->caja_id = $caja->id; // ID de la caja
+        $movimiento->usuario_id = $request->user_id; // ID del usuario que realiza el movimiento
+        $movimiento->tipo = 'entrada'; // Tipo de movimiento
+        $movimiento->descripcion = "Registro de venta"; // Descripción del movimiento
+        $movimiento->fecha = now(); // Establecer la fecha actual
+        
+        // Verificar la forma de pago y asignar el monto correspondiente
+        if ($request->forma_pago === 'Divisa') {
+            $movimiento->monto_dolares = $montoTotal; // Asignar el monto total en dólares
+            $movimiento->monto_bolivares = 0; // Asegúrate de que el campo en bolívares esté vacío
+        } else {
+            $movimiento->monto_bolivares = $montoTotal; // Asignar el monto total en bolívares
+            $movimiento->monto_dolares = 0; // Asegúrate de que el campo en dólares esté vacío
+        }
+        
+        // Guardar el movimiento en la base de datos
+        $movimiento->save();
+
 
         Alert::success('¡Exito!', 'Venta generada exitosamente')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
         return redirect()->back();
@@ -258,27 +299,27 @@ class VentaController extends Controller
     {
         // Encuentra la venta por su ID
         $venta = Venta::find($id);
-        
+
         if (!$venta) {
             Alert::error('¡Error!', 'Venta no encontrada')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
             return redirect()->route('ventas');
         }
-    
+
         // Elimina los detalles de la venta
         $venta->detalleVentas()->delete();
-    
+
         // Elimina el pago asociado a la venta
         if ($venta->pago) {
             $venta->pago->delete();
         }
-    
+
         // Elimina la venta
         $venta->delete();
-    
+
         Alert::success('¡Éxito!', 'Venta y pago eliminados exitosamente')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
         return redirect()->route('ventas.index');
     }
-    
+
 
     public function show($id)
     {

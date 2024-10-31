@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Movimiento extends Model
 {
     use HasFactory;
-
+    protected $table = 'movimientos_caja';
     public function caja()
     {
         return $this->belongsTo(Caja::class);

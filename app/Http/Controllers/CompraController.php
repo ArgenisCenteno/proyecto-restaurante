@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\Caja;
 use App\Models\Compra;
 use App\Models\CuentaPorCobrar;
+use App\Models\CuentaPorPagar;
 use App\Models\DetalleCompra;
 use App\Models\Pago;
 use App\Models\Producto;
@@ -185,10 +186,28 @@ class CompraController extends Controller
 
         $userId = Auth::id();
 
+       // dd($request->metodoPago != 'A credito');
         //registrar pago
+        if ($request->metodoPago != 'A credito') {
+            $estatus = 'Pagado';
+        } else {
+            $estatus = 'Pendiente';
 
+            $deuda = new CuentaPorPagar();
+            
+            $deuda->proveedor_id = $request->user_id;
+            $deuda->user_id = Auth::user()->id;
+            $deuda->tipo = "Pago de compra de mercancía";
+            $deuda->descripcion = "Pago por concepto de comrpa de mercancía " . number_format($montoTotal, 2, ',', '.') . " BS."; 
+            
+            $deuda->monto = $montoTotal;
+            $deuda->estado = $estatus;
+            
+            $deuda->save();
+            
+        }
         $pago = new Pago();
-        $pago->status = 'Pagado';
+        $pago->status = $estatus;
         $pago->tipo = 'Compra';
         $pago->forma_pago = $request->metodoPago;
 
@@ -204,9 +223,9 @@ class CompraController extends Controller
         //registrar Compra
         $Compra = new Compra();
         $Compra->user_id = $userId;
-        $Compra->proveedor_id = $userId;
+        $Compra->proveedor_id = $request->user_id;
         $Compra->monto_total = $montoTotal;
-        $Compra->status = 'Pagado';
+        $Compra->status =  $estatus;
         $Compra->pago_id = $pago->id;
         $Compra->save();
 
@@ -216,7 +235,7 @@ class CompraController extends Controller
         $cuenta->descripcion = "Compra de mercancía a proveedores";
         $cuenta->pago_id = $pago->id;
         $cuenta->monto = $montoTotal;
-        $cuenta->estado = "Pagado";
+        $cuenta->estado = $estatus;
         $cuenta->save();
 
         // Registrar detalles Compras
@@ -244,7 +263,7 @@ class CompraController extends Controller
         $recibo = new Recibo();
         $recibo->tipo = 'Compra';
         $recibo->monto = $montoTotal;
-        $recibo->estatus = 'Pagado';
+        $recibo->estatus = $estatus;
         $recibo->pago_id = $pago->id;
         $recibo->user_id = $request->user_id;
         $recibo->activo = 1;
