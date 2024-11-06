@@ -4,8 +4,7 @@
             <tr>
                 <th>#</th>
                 <th>Nombre</th>
-                <th>Estatus</th>
-                <th>Fecha Creación</th>
+                <th>Estatus</th> 
                 <th>Opciones</th>
             </tr>
         </thead>
@@ -44,10 +43,6 @@
                     name: 'sstatus',
                 },
 
-                {
-                    data: 'created_at',
-                    name: 'created_at',
-                },
 
 
                 {

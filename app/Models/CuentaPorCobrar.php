@@ -15,7 +15,8 @@ class CuentaPorCobrar extends Model
         'descripcion',
         'pago_id',
         'monto',
-        'estado'
+        'estado',
+        'venta_id'
     ];
 
     // Relación opcional con el modelo de Pago

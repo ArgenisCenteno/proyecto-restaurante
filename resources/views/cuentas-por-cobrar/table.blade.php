@@ -13,7 +13,7 @@
                 <th>Estado</th>
                 <th>Acciones</th>
             </tr>
-        </thead>
+        </thead>  
     </table>
 </div>
 
@@ -28,7 +28,7 @@
             serverSide: true,
             ajax: '{{ route('cuentas-por-cobrar.index') }}',
             columns: [
-                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                { data: 'id', name: 'id', orderable: false, searchable: false },
                 { data: 'tipo', name: 'tipo' },
                 { data: 'descripcion', name: 'descripcion' },
                 { data: 'monto', name: 'monto' },
@@ -37,6 +37,8 @@
                 { data: 'estado', name: 'estado' },
                 { data: 'actions', name: 'actions', orderable: false, searchable: false },
             ]
+            ,
+            order: [[0, 'desc']],
         });
     });
 </script>

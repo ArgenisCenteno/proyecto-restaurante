@@ -5,6 +5,7 @@ use App\Http\Controllers\CajaController;
 use App\Http\Controllers\CarritoController;
 use App\Http\Controllers\CompraController;
 use App\Http\Controllers\CuentaPorCobrarController;
+use App\Http\Controllers\CuentaPorPagarController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\PagoController;
@@ -41,6 +42,7 @@ Route::post('/pagarCuenta', [PagoController::class, 'pagarCuenta'])->name('pagar
 Route::resource('cuentas-por-cobrar', CuentaPorCobrarController::class);
 
 //Notificaciones
+Route::resource('cuentas-por-pagar', CuentaPorPagarController::class);
 
 Route::get('notificaciones', [NotificacionController::class, 'index'])->name('notificaciones.index');
 Route::get('notificaciones/{id}', [NotificacionController::class, 'show'])->name('notificaciones.show');
@@ -65,9 +67,15 @@ Route::resource('subcategorias', App\Http\Controllers\SubCategoriaController::cl
 Route::resource('cajas', App\Http\Controllers\CajaController::class);
 Route::get('/aperturar/{id}', [CajaController::class, 'aperturarCaja'])->name('cajas.aperturar');
 Route::post('/registrarApertura/{id}', [CajaController::class, 'registrarApertura'])->name('cajas.registrarApertura');
+Route::put('/cierre/{id}', [CajaController::class, 'cerrarCaja'])->name('caja.cierre');
+Route::get('/aperturas', [CajaController::class, 'aperturasIndex'])->name('caja.aperturas');
+Route::get('/cierres', [CajaController::class, 'cierresIndex'])->name('caja.cierres');
 
 /* VENTAS */
+Route::get('/ventas/export', [VentaController::class, 'export'])->name('ventas.export');
+
 Route::resource('ventas', App\Http\Controllers\VentaController::class);
+
 Route::get('/vender', [VentaController::class, 'vender'])->name('ventas.vender');
 Route::get('/datatableProductoVenta', [VentaController::class, 'datatableProductoVenta'])->name('ventas.datatableProductoVenta');
 Route::post('/generarVenta', [VentaController::class, 'generarVenta'])->name('ventas.generarVenta');
@@ -82,6 +90,8 @@ Route::resource('tasas', App\Http\Controllers\TasasController::class);
 });
 
 /* COMPRAS */
+Route::get('/compras/export', [CompraController::class, 'export'])->name('compras.export');
+
 Route::resource('compras', App\Http\Controllers\CompraController::class);
 Route::get('/comprar', [CompraController::class, 'comprar'])->name('compras.comprar');
 Route::get('/datatableProductoCompra', [CompraController::class, 'datatableProductoCompras'])->name('compras.datatableProductoCompra');

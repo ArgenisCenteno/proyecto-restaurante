@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class CierreCaja extends Model
 {
     use HasFactory;
+    protected  $table = 'cierres_caja';
 
     /**
      * The attributes that are mass assignable.

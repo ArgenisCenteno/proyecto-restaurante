@@ -7,6 +7,7 @@
                 <th>Creado por</th>
                 <th>Monto Total</th>
                 <th>Fecha</th>
+                <th>Metodo de Pago</th>
                 <th>Estado</th>
                 <th>Opciones</th>
             </tr>
@@ -37,6 +38,7 @@
                 { data: 'user', name: 'user' },
                 { data: 'monto_total', name: 'monto_total' },
                 { data: 'fecha', name: 'fecha' },
+                { data: 'forma_pago', name: 'forma_pago' },
                 { data: 'status', name: 'status' },
                 { data: 'actions', name: 'actions', searchable: false, orderable: false }
             ],

@@ -12,7 +12,7 @@ use App\Models\Proveedor;
 use App\Models\Recibo;
 use App\Models\Tasa;
 use App\Models\Transaccion;
-use App\Models\User; 
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
@@ -27,45 +27,51 @@ class CompraController extends Controller
             $data = Compra::with(['user', 'proveedor', 'pago'])->get();
             return DataTables::of($data)
                 ->addIndexColumn()
-                ->addColumn('user', function($row) {
+                ->addColumn('user', function ($row) {
                     return $row->user->name;
                 })
-                ->addColumn('proveedor', function($row) {
+                ->addColumn('proveedor', function ($row) {
                     return $row->proveedor->razon_social;
                 })
-                ->addColumn('monto_neto', function($row) {
-                    return number_format($row->pago->monto_neto, 2);
+                ->addColumn('monto_neto', function ($row) {
+                    if ($row->pago) {
+                        return number_format($row->pago->monto_neto, 2);
+                    } else {
+                        $status = $row->status;
+                        $class = $status == 'Pagado' ? 'success' : 'danger'; // Clase basada en el estado
+                        return '<span class="badge bg-' . $class . '">' . $status . '</span>';
+                    }
                 })
-                ->addColumn('monto_total', function($row) {
-                    return number_format($row->pago->monto_total, 2);
+                ->addColumn('monto_total', function ($row) {
+                    return number_format($row->monto_total, 2);
                 })
-                ->addColumn('fecha', function($row) {
+                ->addColumn('fecha', function ($row) {
                     return $row->created_at->format('Y-m-d'); // Ajusta el formato de fecha aquí
                 })
-                ->addColumn('status', function($row) {
-                    $status = $row->pago->status;
+                ->addColumn('status', function ($row) {
+                    $status = $row->status;
                     $class = $status == 'Pagado' ? 'success' : 'danger'; // Clase basada en el estado
                     return '<span class="badge bg-' . $class . '">' . $status . '</span>';
                 })
-                ->addColumn('actions', function($row) {
+                ->addColumn('actions', function ($row) {
                     $viewUrl = route('compras.show', $row->id);
                     $deleteUrl = route('compras.destroy', $row->id);
                     $pdfUrl = route('compras.pdf', $row->id); // Asegúrate de que la ruta esté correcta
                     return '
-                            <a href="'.$pdfUrl.'" class="btn btn-success btn-sm" target="_blank">Recibo</a>
-                           <form action="'.$deleteUrl.'"  method="POST" style="display:inline; " class="btn-delete">
-                            '.csrf_field().'
-                            '.method_field('DELETE').'
+                            <a href="' . $pdfUrl . '" class="btn btn-success btn-sm" target="_blank">Recibo</a>
+                           <form action="' . $deleteUrl . '"  method="POST" style="display:inline; " class="btn-delete">
+                            ' . csrf_field() . '
+                            ' . method_field('DELETE') . '
                             <button type="submit" class="btn btn-danger btn-sm " >Eliminar</button>
                         </form>';
                 })
-                ->rawColumns(['status', 'actions'])
+                ->rawColumns(['status', 'actions', 'monto_neto'])
                 ->make(true);
         }
-    
+
         return view('compras.index');
     }
-    
+
 
     /**
      * Show the form for creating a new resource.
@@ -86,7 +92,7 @@ class CompraController extends Controller
     /**
      * Display the specified resource.
      */
-  
+
     public function edit(string $id)
     {
         //
@@ -100,7 +106,7 @@ class CompraController extends Controller
         //
     }
 
-   
+
 
     public function comprar(Request $request)
     {
@@ -186,90 +192,119 @@ class CompraController extends Controller
 
         $userId = Auth::id();
 
-       // dd($request->metodoPago != 'A credito');
+        // dd($request->metodoPago != 'A credito');
         //registrar pago
         if ($request->metodoPago != 'A credito') {
             $estatus = 'Pagado';
+
+            $pago = new Pago();
+            $pago->status = $estatus;
+            $pago->tipo = 'Compra';
+            $pago->forma_pago = $request->metodoPago;
+
+
+            $pago->monto_total = $montoTotal;
+            $pago->monto_neto = $totalNeto;
+            $pago->tasa_dolar = $request->tasa;
+            $pago->creado_id = $userId;
+            $pago->fecha_pago = Carbon::now()->format('Y-m-d');
+            $pago->impuestos = $impuestosTotal;
+            $pago->save();
+
+            //registrar Compra
+            $Compra = new Compra();
+            $Compra->user_id = $userId;
+            $Compra->proveedor_id = $request->user_id;
+            $Compra->monto_total = $montoTotal;
+            $Compra->status = $estatus;
+            $Compra->pago_id = $pago->id;
+            $Compra->save();
+
+
+
+
+            // Registrar detalles Compras
+            foreach ($productos as $producto) {
+
+
+
+                $detalleCompra = new DetalleCompra();
+                $detalleCompra->id_producto = $producto['id'];
+                $detalleCompra->precio_producto = $producto['precio'];
+                $detalleCompra->cantidad = $producto['cantidad'];
+                $detalleCompra->neto = $producto['precio'] * $producto['cantidad'];
+                $detalleCompra->impuesto = ($producto['aplicaIva'] == 1) ? ($producto['precio'] * 0.16) * $producto['cantidad'] : 0;
+                $detalleCompra->id_Compra = $Compra->id;
+                $detalleCompra->save();
+
+                // Actualizar stock
+                $productoModel = Producto::find($producto['id']);
+                if ($productoModel) {
+                    $productoModel->cantidad += $producto['cantidad'];
+                    $productoModel->save();
+                }
+            }
+
+            $recibo = new Recibo();
+            $recibo->tipo = 'Compra';
+            $recibo->monto = $montoTotal;
+            $recibo->estatus = $estatus;
+            $recibo->pago_id = $pago->id;
+            $recibo->user_id = $request->user_id;
+            $recibo->activo = 1;
+            $recibo->creado_id = $userId;
+            $recibo->descuento = $request->descuento;
+            $recibo->save();
         } else {
             $estatus = 'Pendiente';
+            //registrar Compra
+            $Compra = new Compra();
+            $Compra->user_id = $userId;
+            $Compra->proveedor_id = $request->user_id;
+            $Compra->monto_total = $montoTotal;
+            $Compra->status = $estatus;
+            // $Compra->pago_id = $pago->id;
+            $Compra->save();
 
-            $deuda = new CuentaPorPagar();
-            
-            $deuda->proveedor_id = $request->user_id;
-            $deuda->user_id = Auth::user()->id;
-            $deuda->tipo = "Pago de compra de mercancía";
-            $deuda->descripcion = "Pago por concepto de comrpa de mercancía " . number_format($montoTotal, 2, ',', '.') . " BS."; 
-            
-            $deuda->monto = $montoTotal;
-            $deuda->estado = $estatus;
-            
-            $deuda->save();
-            
-        }
-        $pago = new Pago();
-        $pago->status = $estatus;
-        $pago->tipo = 'Compra';
-        $pago->forma_pago = $request->metodoPago;
-
-
-        $pago->monto_total = $montoTotal;
-        $pago->monto_neto = $totalNeto;
-        $pago->tasa_dolar = $request->tasa;
-        $pago->creado_id = $userId;
-        $pago->fecha_pago = Carbon::now()->format('Y-m-d');
-        $pago->impuestos = $impuestosTotal;
-        $pago->save();
-
-        //registrar Compra
-        $Compra = new Compra();
-        $Compra->user_id = $userId;
-        $Compra->proveedor_id = $request->user_id;
-        $Compra->monto_total = $montoTotal;
-        $Compra->status =  $estatus;
-        $Compra->pago_id = $pago->id;
-        $Compra->save();
-
-
-        $cuenta = new CuentaPorCobrar();
-        $cuenta->tipo = "Compra de Mercancía";
-        $cuenta->descripcion = "Compra de mercancía a proveedores";
-        $cuenta->pago_id = $pago->id;
-        $cuenta->monto = $montoTotal;
-        $cuenta->estado = $estatus;
-        $cuenta->save();
-
-        // Registrar detalles Compras
-        foreach ($productos as $producto) {
+            $cuenta = new CuentaPorPagar();
+            $cuenta->tipo = "Compra de Mercancía";
+            $cuenta->descripcion = "Compra de mercancía a proveedores";
+            $cuenta->proveedor_id = $request->user_id;
+            $cuenta->user_id = Auth::user()->id;
+            $cuenta->monto = $montoTotal;
+            $cuenta->estado = $estatus;
+            $cuenta->compra_id = $Compra->id;
+            $cuenta->save();
 
 
 
-            $detalleCompra = new DetalleCompra();
-            $detalleCompra->id_producto = $producto['id'];
-            $detalleCompra->precio_producto = $producto['precio'];
-            $detalleCompra->cantidad = $producto['cantidad'];
-            $detalleCompra->neto = $producto['precio'] * $producto['cantidad'];
-            $detalleCompra->impuesto = ($producto['aplicaIva'] == 1) ? ($producto['precio'] * 0.16) * $producto['cantidad'] : 0;
-            $detalleCompra->id_Compra = $Compra->id;
-            $detalleCompra->save();
 
-            // Actualizar stock
-            $productoModel = Producto::find($producto['id']);
-            if ($productoModel) {
-                $productoModel->cantidad += $producto['cantidad'];
-                $productoModel->save();
+
+            // Registrar detalles Compras
+            foreach ($productos as $producto) {
+
+
+
+                $detalleCompra = new DetalleCompra();
+                $detalleCompra->id_producto = $producto['id'];
+                $detalleCompra->precio_producto = $producto['precio'];
+                $detalleCompra->cantidad = $producto['cantidad'];
+                $detalleCompra->neto = $producto['precio'] * $producto['cantidad'];
+                $detalleCompra->impuesto = ($producto['aplicaIva'] == 1) ? ($producto['precio'] * 0.16) * $producto['cantidad'] : 0;
+                $detalleCompra->id_Compra = $Compra->id;
+                $detalleCompra->save();
+
+                // Actualizar stock
+                $productoModel = Producto::find($producto['id']);
+                if ($productoModel) {
+                    $productoModel->cantidad += $producto['cantidad'];
+                    $productoModel->save();
+                }
             }
         }
 
-        $recibo = new Recibo();
-        $recibo->tipo = 'Compra';
-        $recibo->monto = $montoTotal;
-        $recibo->estatus = $estatus;
-        $recibo->pago_id = $pago->id;
-        $recibo->user_id = $request->user_id;
-        $recibo->activo = 1;
-        $recibo->creado_id = $userId;
-        $recibo->descuento = $request->descuento;
-        $recibo->save();
+
+
 
 
         Alert::success('¡Exito!', 'Compra generada exitosamente')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
@@ -280,31 +315,39 @@ class CompraController extends Controller
     {
         // Encuentra la Compra por su ID
         $Compra = Compra::find($id);
-        
+
         if (!$Compra) {
             Alert::error('¡Error!', 'Compra no encontrada')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
             return redirect()->route('compras.index');
         }
-    
+
         // Elimina los detalles de la Compra
         $Compra->detalleCompras()->delete();
-    
+
         // Elimina el pago asociado a la Compra
         if ($Compra->pago) {
             $Compra->pago->delete();
         }
-    
+
         // Elimina la Compra
         $Compra->delete();
-    
+
         Alert::success('¡Éxito!', 'Compra y pago eliminados exitosamente')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
         return redirect()->route('compras.index');
     }
-    
+
 
     public function show($id)
     {
         $compra = Compra::with(['user', 'proveedor', 'pago', 'detalleCompras'])->find($id);
         return view('compras.show', compact('compra'));
+    }
+
+    public function export(Request $request)
+    {
+        $start_date = $request->input('start_date');
+        $end_date = $request->input('end_date');
+
+        return Excel::download(new ComprasExport($start_date, $end_date), 'compras_' . $start_date . '_to_' . $end_date . '.xlsx');
     }
 }

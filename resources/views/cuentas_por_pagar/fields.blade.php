@@ -60,7 +60,7 @@
 <div class="modal fade" id="pagarModal" tabindex="-1" aria-labelledby="pagarModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="{{ route('cuentas-por-cobrar.update', $cuenta->id) }}" method="POST">
+            <form action="{{ route('cuentas-por-pagar.update', $cuenta->id) }}" method="POST">
                 @csrf
                 @method('PUT')
                 
@@ -89,14 +89,6 @@
                             <option value="Punto de Venta">Punto de Venta</option>
                         </select>
                     </div>
-                    <label for="Cliente"> 
-                        <strong>Caja</strong>
-                    </label>
-                <select name="caja" id="caja" class="form-control select2 mb-2 mt-2" required>
-                    @foreach($cajas as $caja)
-                        <option value="{{ $caja->id }}">{{ $caja->nombre }}</option>
-                    @endforeach
-                </select>
                 </div>
                 
                 <div class="modal-footer">

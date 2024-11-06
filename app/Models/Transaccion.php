@@ -8,8 +8,20 @@ use Illuminate\Database\Eloquent\Model;
 class Transaccion extends Model
 {
     use HasFactory;
+
     protected $table = 'transacciones';
 
+    protected $fillable = [
+        'caja_id',
+        'usuario_id',
+        'tipo',
+        'monto_total_bolivares',
+        'monto_total_dolares',
+        'metodo_pago',
+        'moneda',
+        'fecha',
+        'apertura_id'
+    ];
 
     public function caja()
     {
@@ -20,5 +32,4 @@ class Transaccion extends Model
     {
         return $this->belongsTo(User::class);
     }
-
 }

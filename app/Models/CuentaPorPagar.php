@@ -19,6 +19,7 @@ class CuentaPorPagar extends Model
         'pago_id',
         'monto',
         'estado',
+        'compra_id'
     ];
 
     // Relación con el modelo Proveedor

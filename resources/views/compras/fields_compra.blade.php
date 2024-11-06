@@ -38,7 +38,7 @@
                     </div>
                 </label>
               <label for="Cliente"> <i class="fas fa-user text-success mt-3"></i> Proveedor</label>
-              <select name="user_id" id="user_id" class="form-control select2 mb-2 mt-2">
+              <select name="user_id" id="user_id" class="form-control select2 mb-2 mt-2" required>
                 <option value="">Seleccione una opción</option>
                     @foreach($users as $id => $name)
                         <option value="{{ $id }}">{{ $name }}</option>

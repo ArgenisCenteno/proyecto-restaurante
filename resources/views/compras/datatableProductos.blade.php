@@ -44,7 +44,7 @@
                 }
             },
                 { data: 'nombre', name: 'nombre' },
-                { data: 'precio_venta', name: 'precio_compra' },
+                { data: 'precio_compra', name: 'precio_compra' },
                 {
                     data: 'aplica_iva', name: 'aplica_iva', render: function (data) {
                         return data ? 'Sí' : 'No';
@@ -104,9 +104,9 @@
                         }
 
                         const productName = producto.nombre;
-                        const productPrice = producto.precio_venta;
+                        const productPrice = producto.precio_compra;
                         const productIva = producto.aplica_iva ? 'Sí' : 'No';
-                        var precioProductoIva = producto.precio_venta;
+                        var precioProductoIva = producto.precio_compra;
                         if (productIva == 'Sí') {
                             var precioProductoIva = productPrice * 1.16;
                         } else {
@@ -198,17 +198,7 @@
             const productId = $(this).attr('id').split('_')[1]; // Obtener el ID del producto
             const nuevaCantidad = parseInt($(this).val());
             const stockDisponible = parseInt($(`#stock_${productId}`).val()); // Obtener el stock disponible
-            if (nuevaCantidad > stockDisponible) {
-                Swal.fire({
-                    title: 'Sin disponibilidad suficiente',
-                    text: "No hay disponibilidad suficiente actualmente",
-                    icon: 'info',
-                    showCancelButton: false,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33'
-                })
-                $(this).val(stockDisponible);
-            }
+           
 
             // Actualizar la cantidad en el array
             productosEnCarrito = productosEnCarrito.map(function (producto) {

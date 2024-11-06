@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\AperturaCaja;
 use App\Models\Caja;
+use App\Models\CierreCaja;
+use App\Models\Movimiento;
+use App\Models\Transaccion;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
 use Flash;
@@ -20,7 +23,7 @@ class CajaController extends Controller
     {
         if ($request->ajax()) {
             $caja = Caja::all();
-    
+
             return DataTables::of($caja)
                 ->addColumn('status', function ($categoria) {
                     if ($categoria->activa == 0) {
@@ -31,9 +34,7 @@ class CajaController extends Controller
                         return '';
                     }
                 })
-                ->editColumn('created_at', function ($categoria) {
-                    return $categoria->created_at->format('Y-m-d H:i:s');
-                })
+
                 ->addColumn('actions', 'caja.actions')
                 ->rawColumns(['status', 'actions'])
                 ->make(true);
@@ -56,10 +57,10 @@ class CajaController extends Controller
     public function store(Request $request)
     {
         $consultar = Caja::where('nombre', $request->nombre)->first();
-        
-       
 
-        if($consultar){
+
+
+        if ($consultar) {
             Alert::error('¡Error!', 'Existe una caja con este nombre')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
             return redirect(route('categorias.index'));
         }
@@ -75,7 +76,7 @@ class CajaController extends Controller
             // Error al intentar crear la categoría
             Alert::error('¡Error!', 'Error al intentar registrar la caja')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
         }
-    
+
         return redirect(route('cajas.index'));
     }
 
@@ -87,11 +88,21 @@ class CajaController extends Controller
         $caja = Caja::where('id', $id)->where('activa', 1)->first();
 
 
-
-        if(!$caja){
+        if (!$caja) {
             Alert::error('¡Error!', 'No se puede abrir una caja inactiva')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
             return redirect(route('cajas.index'));
         }
+        $apertura = AperturaCaja::where('caja_id', $caja->id)->first();
+
+        //dd($apertura);
+        if ($apertura) {
+            if ($apertura->estado == 'Operando') {
+                $movimientos = Movimiento::where('apertura_id', $apertura->id)->get();
+                $transacciones = Transaccion::where('apertura_id', $apertura->id)->get();
+                return view('caja.cierre')->with('caja', $caja)->with('movimientos', $movimientos)->with('transacciones', $transacciones);
+            }
+        }
+
 
         return view('caja.abrirCaja')->with('caja', $caja);
     }
@@ -99,7 +110,7 @@ class CajaController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit( $id)
+    public function edit($id)
     {
         $caja = Caja::findOrFail($id);
 
@@ -112,9 +123,9 @@ class CajaController extends Controller
     public function update(Request $request, string $id)
     {
         $actualizar = Caja::where('id', $id)->first();
-       
 
-        if(!$actualizar){
+
+        if (!$actualizar) {
             Alert::error('¡Error!', 'No existe esta caja')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
             return redirect(route('categorias.index'));
         }
@@ -130,19 +141,19 @@ class CajaController extends Controller
             // Error al intentar crear la categoría
             Alert::error('¡Error!', 'Error al intentar actualizar la caja')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
         }
-    
+
         return redirect(route('cajas.index'));
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy( $id)
+    public function destroy($id)
     {
         $caja = Caja::where('id', $id)->first();
-       
 
-        if(!$caja){
+
+        if (!$caja) {
             Alert::error('¡Error!', 'No existe esta caja')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
             return redirect(route('categorias.index'));
         }
@@ -154,9 +165,9 @@ class CajaController extends Controller
 
     public function registrarApertura(Request $request, $id)
     {
-       
-      
-      
+
+
+
         // Crear el registro de apertura de caja
         $aperturaCaja = AperturaCaja::create([
             'caja_id' => $id,
@@ -169,5 +180,62 @@ class CajaController extends Controller
         // Devolver una respuesta
         Alert::success('¡Éxito!', 'Caja aperturada exitosamente')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
         return redirect()->route('cajas.index');
+    }
+
+    public function cerrarCaja(Request $request, $id)
+    {
+        $caja = Caja::find($id);
+        $apertura = AperturaCaja::where('caja_id', $caja->id)->where('estado', 'Operando')->first();
+
+      
+        $transacciones = Transaccion::where('apertura_id', $id)
+            ->where('caja_id', $apertura->caja_id)
+
+            ->get();
+
+        // Calcular los totales generales
+
+        $montoBs = 0;
+        $montoDolar = 0;
+
+
+        foreach ($transacciones as $transaccion) {
+
+            $montoBs += $transaccion->monto_total_bolivares;
+            $montoDolar += $transaccion->monto_total_dolares;
+
+        }
+
+
+        // Aquí puedes crear una nueva instancia de CierraCaja
+        $cierre = new CierreCaja();
+        $cierre->caja_id = $apertura->caja_id; // Suponiendo que el modelo CierraCaja tiene un campo caja_id
+        $cierre->usuario_id = auth()->id(); // Si deseas registrar quién cerró la caja
+        $cierre->monto_final_bolivares = $montoBs; // Asegúrate de que estos campos existan en tu request
+        $cierre->monto_final_dolares = $montoDolar;
+        //  $cierre->discrepancia_bolivares = $request->input('discrepancia_bolivares');
+        // $cierre->discrepancia_dolares = $request->input('discrepancia_dolares');
+        //$cierre->apertura_caja = $apertura->id; // Relacionando con la apertura de caja
+
+        $cierre->save(); // Guardar el cierre
+
+        $apertura->estado = 'Finalizado';
+        $apertura->save();
+        Alert::success('¡Exito!', 'Caja cerrada')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
+
+        return redirect()->route('cajas.index')->with('success', 'Apertura de caja cerrada exitosamente.');
+
+    }
+
+    public function aperturasIndex(){
+        $aperturas = AperturaCaja::orderBy('id', 'DESC')->get();
+
+        return view('caja.aperturas')->with('aperturas', $aperturas);
+    }
+
+    public function cierresIndex(){
+        $aperturas = CierreCaja::orderBy('id', 'DESC')->get();
+
+        return view('caja.cierres')->with('aperturas', $aperturas);
     }
 }
