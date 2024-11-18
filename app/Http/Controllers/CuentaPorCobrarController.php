@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Exports\CuentasPorCobrarExport;
 use App\Models\AperturaCaja;
 use App\Models\Caja;
 use App\Models\CuentaPorCobrar;
@@ -13,6 +14,7 @@ use Auth;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Alert;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\DataTables;
 
 class CuentaPorCobrarController extends Controller
@@ -212,5 +214,18 @@ class CuentaPorCobrarController extends Controller
         $cuenta = CuentaPorCobrar::findOrFail($id);
         $cuenta->delete();
         return response()->json(null, 204);
+    }
+
+    public function exportarCuentasPorCobrar(Request $request)
+    {
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
+
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        return Excel::download(new CuentasPorCobrarExport($startDate, $endDate), 'cuentas_por_cobrar.xlsx');
     }
 }

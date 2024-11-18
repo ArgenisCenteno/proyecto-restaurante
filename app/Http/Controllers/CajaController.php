@@ -92,10 +92,14 @@ class CajaController extends Controller
             Alert::error('¡Error!', 'No se puede abrir una caja inactiva')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
             return redirect(route('cajas.index'));
         }
-        $apertura = AperturaCaja::where('caja_id', $caja->id)->first();
+        $apertura = AperturaCaja::where('caja_id', $caja->id)
+         
+        ->orderBy('id', 'desc') // Ordena de manera descendente
+        ->first();
 
         //dd($apertura);
         if ($apertura) {
+          //  dd($apertura);
             if ($apertura->estado == 'Operando') {
                 $movimientos = Movimiento::where('apertura_id', $apertura->id)->get();
                 $transacciones = Transaccion::where('apertura_id', $apertura->id)->get();

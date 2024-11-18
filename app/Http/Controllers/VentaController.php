@@ -59,15 +59,15 @@ class VentaController extends Controller
                     $class = $status == 'Pagado' ? 'success' : 'danger'; // Clase basada en el estado
                     return '<span class="badge bg-' . $class . '">' . $status . '</span>';
                 })
-                ->addColumn('actions', function ($row) {
+                ->addColumn('actions', function($row) {
                     $viewUrl = route('ventas.show', $row->id);
                     $deleteUrl = route('ventas.destroy', $row->id);
                     $pdfUrl = route('ventas.pdf', $row->id); // Asegúrate de que la ruta esté correcta
-                    return '
-                            <a href="' . $pdfUrl . '" class="btn btn-success btn-sm" target="_blank">Recibo</a>
-                           <form action="' . $deleteUrl . '"  method="POST" style="display:inline; " class="btn-delete">
-                            ' . csrf_field() . '
-                            ' . method_field('DELETE') . '
+                    return '<a href="'.$viewUrl.'" class="btn btn-info btn-sm">Ver</a>
+                            <a href="'.$pdfUrl.'" class="btn btn-warning btn-sm" target="_blank">PDF</a>
+                           <form action="'.$deleteUrl.'"  method="POST" style="display:inline; " class="btn-delete">
+                            '.csrf_field().'
+                            '.method_field('DELETE').'
                             <button type="submit" class="btn btn-danger btn-sm " >Eliminar</button>
                         </form>';
                 })
@@ -117,9 +117,35 @@ class VentaController extends Controller
     public function vender(Request $request)
     {
         //$caja = Caja::where('activa', '1')->first();
-        $dollar = Tasa::where('name', 'Dollar')->where('status', 'Activo')->first();
-        $users = User::pluck('name', 'id');
+         $users = User::pluck('name', 'id');
         $cajas = Caja::all();
+        function isConnected()
+        {
+            $connected = @fsockopen("www.google.com", 80); // Intenta conectar al puerto 80 de Google
+            if ($connected) {
+                fclose($connected);
+                return true; // Hay conexión
+            }
+            return false; // No hay conexión
+        }
+
+        if (isConnected()) {
+            $response = file_get_contents("https://ve.dolarapi.com/v1/dolares/oficial");
+          
+        } else {
+             
+            $response = false;
+        }
+ 
+
+
+        // dd();
+        if ($response) {
+            $dato = json_decode($response);
+            $dollar = $dato->promedio;
+        } else {
+            $dollar = 44.30;
+        }
         return view('ventas.vender')->with('cajas', $cajas)->with('dollar', $dollar)->with('users', $users);
     }
 
@@ -170,19 +196,22 @@ class VentaController extends Controller
 
     public function generarVenta(Request $request)
     {
-        
-        if (!$request->caja) {
-            Alert::error('¡Error!', 'Debe seleccionar una caja')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
+        $caja = Caja::find(1);
+      
+        if(!$caja){
+            Alert::error('¡Error!', 'No hay caja disponible')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
             return redirect()->back();
+
         }
-        $caja = Caja::find($request->caja);
+
         $apertura = AperturaCaja::where('caja_id', $caja->id)->where('estado', 'Operando')->first();
-        if (!$apertura) {
-            Alert::error('¡Error!', 'La caja seleccionada no está abierta')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
+        if(!$apertura){
+            Alert::error('¡Error!', 'No existe una caja abierta')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
             return redirect()->back();
         }
-        if ($request->producto == [] || $request->producto == null) {
+        if ($request->productos == [] || $request->productos == null) {
             Alert::error('¡Error!', 'Para realizar una venta es necesario agregar productos')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
+            return redirect()->back();
         }
         //obtener datos
         $productos = json_decode($request->productos, true);
@@ -196,6 +225,18 @@ class VentaController extends Controller
         $impuestosTotal = 0;
 
         foreach ($productos as $producto) {
+            $productoModel = Producto::find($producto['id']);
+            if ($productoModel->cantidad < $producto['cantidad']) {
+                // Obtener el nombre del producto
+                $nombreProducto = $productoModel->nombre; // Asumiendo que 'nombre' es el campo que contiene el nombre del producto
+            
+                // Mostrar un mensaje de error con el nombre del producto
+                Alert::error('¡Error!', "Stock insuficiente para el producto: $nombreProducto")
+                    ->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
+            
+                return redirect()->back();
+            }
+            
             $totalNeto += $producto['precio'] * $producto['cantidad'];
 
             if ($producto['aplicaIva'] == 1) {
@@ -208,65 +249,29 @@ class VentaController extends Controller
 
 
         $userId = Auth::id();
-        $deuda = null;
+
         //registrar pago
 
-        if ($request->metodoPago != 'A credito') {
-            $estatus = 'Pagado';
-
-            $pago = new Pago();
-            $pago->status = $estatus;
-            $pago->tipo = 'Venta';
-            $pago->forma_pago = $request->metodoPago;
-            $pago->monto_total = $montoTotal;
-            $pago->monto_neto = $totalNeto;
-            $pago->tasa_dolar = $request->tasa;
-            $pago->creado_id = $userId;
-            $pago->fecha_pago = Carbon::now()->format('Y-m-d');
-            $pago->impuestos = $impuestosTotal;
-            $pago->save();
-        } else {
-            $estatus = 'Pendiente';
-
-            $deuda = new CuentaPorCobrar();
-
-            $deuda->user_id = $request->user_id;
-           
-            $deuda->tipo = "Pago de servicio";
-            $deuda->descripcion = "Pago por consumo de comida en establecimiento";
-            
-            $deuda->monto = $montoTotal;
-            $deuda->estado = $estatus;
-
-            $deuda->save();
-
-        }
-
-
-
-
+        $pago = new Pago();
+        $pago->status = 'Pagado';
+        $pago->tipo = 'Venta Regular';
+        $pago->forma_pago = json_encode($metodos);
+        $pago->monto_total = $montoTotal;
+        $pago->monto_neto = $totalNeto;
+        $pago->tasa_dolar = $request->tasa;
+        $pago->creado_id = $userId;
+        $pago->fecha_pago = Carbon::now()->format('Y-m-d');
+        $pago->impuestos = $impuestosTotal;
+        $pago->save();
 
         //registrar venta
         $venta = new Venta();
         $venta->user_id = $request->user_id;
         $venta->vendedor_id = $userId;
         $venta->monto_total = $montoTotal;
-        $venta->status = $estatus;
-        if(!$deuda){
-            $venta->pago_id = $pago->id;
-        }else{
-            $venta->pago_id = null;
-        }
-       
-        $venta->mesa = $request->mesa;
-        $venta->mesa = $request->mesa;
+        $venta->status = 'Pagado';
+        $venta->pago_id = $pago->id;
         $venta->save();
-
-       if($deuda){
-        $deuda->venta_id = $venta->id;
-        
-        $deuda->save();
-       }
 
         // Registrar detalles ventas
         foreach ($productos as $producto) {
@@ -290,11 +295,10 @@ class VentaController extends Controller
             }
         }
 
-        if(!$deuda){
         $recibo = new Recibo();
         $recibo->tipo = 'Venta';
         $recibo->monto = $montoTotal;
-        $recibo->estatus = $estatus;
+        $recibo->estatus = 'Pagado';
         $recibo->pago_id = $pago->id;
         $recibo->user_id = $request->user_id;
         $recibo->activo = 1;
@@ -303,54 +307,27 @@ class VentaController extends Controller
         $recibo->save();
 
         //caja
-      
-        $movimiento = new Movimiento();
 
-        $movimiento->caja_id = $caja->id; // ID de la caja
-        $movimiento->usuario_id = $request->user_id; // ID del usuario que realiza el movimiento
-        $movimiento->tipo = 'entrada'; // Tipo de movimiento
-        $movimiento->descripcion = "Registro de venta"; // Descripción del movimiento
-        $movimiento->apertura_id = $apertura->id;
-        $movimiento->fecha = now(); // Establecer la fecha actual
-
-        // Verificar la forma de pago y asignar el monto correspondiente
-        if ($request->forma_pago === 'Divisa') {
-            $movimiento->monto_dolares = $montoTotal; // Asignar el monto total en dólares
-            $movimiento->monto_bolivares = 0; // Asegúrate de que el campo en bolívares esté vacío
-          
+        foreach ($metodos as $metodo) {
             $transaccion = new Transaccion();
-            $transaccion->caja_id = $caja->id;
-            $transaccion->usuario_id = Auth::user()->id;
-            $transaccion->monto_total_bolivares =  0;
-            $transaccion->monto_total_dolares =  $montoTotal;
-            $transaccion->metodo_pago =  $request->metodoPago;
-            $transaccion->moneda =  'Dollar';
-            $transaccion->fecha =  Carbon::now();
-            $transaccion->apertura_id = $apertura->id;
-            $transaccion->save();
-      
-        } else {
-            $movimiento->monto_bolivares = $montoTotal; // Asignar el monto total en bolívares
-            $movimiento->monto_dolares = 0; // Asegúrate de que el campo en dólares esté vacío
-        
-            $transaccion = new Transaccion();
-            $transaccion->caja_id = $caja->id;
-            $transaccion->usuario_id = Auth::user()->id;
-            $transaccion->monto_total_bolivares =  $montoTotal;
-            $transaccion->monto_total_dolares =  0;
-            
-            $transaccion->metodo_pago =  $request->metodoPago;
-            $transaccion->apertura_id = $apertura->id;
-            $transaccion->moneda =  'Bolivar';
-            $transaccion->fecha =  Carbon::now();
+            $transaccion->caja_id = 1;
+            $transaccion->usuario_id = $userId;
+            $transaccion->tipo = 'VENTA';
+            $transaccion->apertura_id  = $apertura->id;
+            $transaccion->venta_id  = $venta->id;
+            $transaccion->metodo_pago = $metodo['metodo'];
+            if ($metodo['metodo'] == 'Divisa') {
+                $transaccion->moneda = 'Dollar';
+                $transaccion->monto_total_dolares = $metodo['monto_dollar'] ?? 0;
+                $transaccion->monto_total_bolivares = 0;
+            } else {
+                $transaccion->moneda = 'Bolívar';
+                $transaccion->monto_total_bolivares = $metodo['monto_bs'] ?? 0;
+                $transaccion->monto_total_dolares = 0;
+            }
+            $transaccion->fecha = Carbon::now();
             $transaccion->save();
         }
-
-        // Guardar el movimiento en la base de datos
-        $movimiento->save();
-
-       
-    }
 
         Alert::success('¡Exito!', 'Venta generada exitosamente')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
         return redirect()->back();

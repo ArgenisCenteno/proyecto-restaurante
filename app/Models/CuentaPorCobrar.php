@@ -24,4 +24,8 @@ class CuentaPorCobrar extends Model
     {
         return $this->belongsTo(Pago::class);
     }
+    public function venta()
+    {
+        return $this->belongsTo(Venta::class);
+    }
 }

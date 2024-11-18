@@ -91,6 +91,8 @@ Route::resource('tasas', App\Http\Controllers\TasasController::class);
 
 /* COMPRAS */
 Route::get('/compras/export', [CompraController::class, 'export'])->name('compras.export');
+Route::get('/exportar-pagos', [PagoController::class, 'exportarPagos'])->name('exportar.pagos');
+Route::get('/exportar-cuentas-por-cobrar', [CuentaPorCobrarController::class, 'exportarCuentasPorCobrar'])->name('exportar.cuentas_por_cobrar');
 
 Route::resource('compras', App\Http\Controllers\CompraController::class);
 Route::get('/comprar', [CompraController::class, 'comprar'])->name('compras.comprar');

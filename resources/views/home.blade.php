@@ -113,7 +113,7 @@
                                         </div>
                                         <div class="data">
                                             <p>
-                                                0
+                                                {{$ventas}}
                                             </p>
                                         </div>
                                     </div>
@@ -130,7 +130,7 @@
                                         </div>
                                         <div class="data">
                                             <p>
-                                                0
+                                                {{$compras}}
                                             </p>
                                         </div>
                                     </div>
@@ -147,7 +147,7 @@
                                         </div>
                                         <div class="data">
                                             <p>
-                                                0
+                                               {{$productos}}
                                             </p>
                                         </div>
                                     </div>
@@ -164,7 +164,7 @@
                                         </div>
                                         <div class="data">
                                             <p>
-                                                0
+                                               {{$dollar}}
                                             </p>
                                         </div>
                                     </div>
@@ -183,7 +183,7 @@
                                         </div>
                                         <div class="data">
                                             <p>
-                                                0
+                                                {{$pagos}}
                                             </p>
                                         </div>
                                     </div>
@@ -200,7 +200,7 @@
                                         </div>
                                         <div class="data">
                                             <p>
-                                                0
+                                               {{$proveedores}}
                                             </p>
                                         </div>
                                     </div>
@@ -220,7 +220,7 @@
                                         </div>
                                         <div class="data">
                                             <p>
-                                                0
+                                                {{$creditos}}
                                             </p>
                                         </div>
                                     </div>
@@ -239,7 +239,7 @@
                                         </div>
                                         <div class="data">
                                             <p>
-                                                0
+                                                {{$deudas}}
                                             </p>
                                         </div>
                                     </div>

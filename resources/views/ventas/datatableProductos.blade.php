@@ -1,3 +1,11 @@
+<div class="text-center mt-4 card pt-2 pb-2 bg-dark text-white"
+            style="box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;">
+            <h3>Productos</h3>
+
+
+ 
+        </div>
+        <hr />
 <div class="table-responsive">
     <table class="table table-hover" id="productos-table2">
         <thead class="bg-light">
@@ -290,7 +298,10 @@
             montoDollar = cantidadPagada;
         }
 
+        if (metodoPago === 'A credito') {
+            $('#btnSubmit').prop('disabled', false).removeClass('btn-danger').addClass('btn-primary');
 
+        }
         let totalVenta = parseFloat($('#totalVenta').text().replace('$', ''));
         let cancelado = parseFloat($('#cancelado').text().replace('$', ''));
 
@@ -343,9 +354,20 @@
         let html = '';
         metodosPago.forEach((metodo, index) => {
             html += `
-            <div class="mb-2 metodoPagoItem mt-3" style='space-around'>
-                <span>${metodo.metodo} - $${metodo.monto_dollar.toFixed(2)} (${metodo.monto_bs.toFixed(2)} Bs) ${metodo.banco_origen ? ' | Origen: ' + metodo.banco_origen : ''} ${metodo.banco_destino ? ' | Destino: ' + metodo.banco_destino : ''} ${metodo.numero_referencia ? ' | Ref: ' + metodo.numero_referencia : ''}</span>
-                <button type="button" class="btn btn-danger btn-sm removeMetodoPago" data-index="${index}">Eliminar</button>
+           <div class="mb-2 metodoPagoItem mt-3 d-flex align-items-center justify-content-between">
+    <div class="d-flex flex-column">
+        <span class="fw-bold">${metodo.metodo} - $${metodo.monto_dollar.toFixed(2)} (${metodo.monto_bs.toFixed(2)} Bs)</span>
+        <small class="text-muted">
+            ${metodo.banco_origen ? 'Origen: ' + metodo.banco_origen : ''}
+            ${metodo.banco_destino ? ' | Destino: ' + metodo.banco_destino : ''}
+            ${metodo.numero_referencia ? ' | Ref: ' + metodo.numero_referencia : ''}
+        </small>
+    </div>
+    <button type="button" class="btn btn-danger btn-sm removeMetodoPago" data-index="${index}">
+        <i class="bi bi-trash3-fill"></i> Eliminar
+    </button>
+</div>
+
         `;
         });
         $('#metodosPagoList').html(html);
