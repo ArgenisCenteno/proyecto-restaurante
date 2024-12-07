@@ -17,7 +17,7 @@
                     </div>
                     <div class="card-body">
                   
-                     <div class="row">
+                    <div class="row">
                         <div class="col-6">
                         @include('compras.datatableProductos') 
                         </div>

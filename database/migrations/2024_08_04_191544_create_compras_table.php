@@ -20,7 +20,7 @@ class CreateComprasTable extends Migration
             $table->decimal('monto_total', 10, 2); // Monto total de la compra
             $table->string('status'); // Estado de la compra
             $table->decimal('porcentaje_descuento', 5, 2)->nullable(); // Porcentaje de descuento
-            $table->unsignedBigInteger('pago_id'); // Relación con la tabla pagos
+            $table->unsignedBigInteger('pago_id')->nullable(); // Relación con la tabla pagos
             $table->timestamps(); // Campos created_at y updated_at
 
             // Definición de claves foráneas si es necesario

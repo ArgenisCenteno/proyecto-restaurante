@@ -102,148 +102,111 @@
                     <div class=" "> <!-- Light background for the combined box -->
                         <div class="inner">
                             <div class="row mt-4">
-                                <div class="col-md-3">
-                                    <div class="card-dash bg-success">
-                                        <div class="title d-flex justify-content-left align-items-left">
-                                            <p class="title-text">
-                                                Total Ventas
-                                            </p>
-                                            <span class="material-icons" style="font-size: 100px">shopping_cart</span>
-                                            <!-- Nuevo ícono -->
-                                        </div>
-                                        <div class="data">
-                                            <p>
-                                                {{$ventas}}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
+                                <div class="col-lg-3 col-6"> <!--begin::Small Box Widget 1-->
+                                    <div class="small-box text-bg-success">
+                                        <div class="inner">
+                                            <h3>{{$ventas}}</h3>
+                                            <p>Ventas</p>
+                                        </div> <span class="material-icons small-box-icon"
+                                            style="font-size: 100px">shopping_cart</span><a
+                                            href="{{route('ventas.index')}}"
+                                            class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                                            Ver más <i class="bi bi-link-45deg"></i> </a>
+                                    </div> <!--end::Small Box Widget 1-->
+                                </div> <!--end::Col-->
+                                <div class="col-lg-3 col-6"> <!--begin::Small Box Widget 1-->
+                                    <div class="small-box text-bg-primary">
+                                        <div class="inner">
+                                            <h3>{{$compras}}</h3>
+                                            <p>Compras</p>
+                                        </div> <span class="material-icons small-box-icon"
+                                            style="font-size: 100px">shopping_bag</span><a
+                                            href="{{route('ventas.index')}}"
+                                            class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                                            Ver más <i class="bi bi-link-45deg"></i> </a>
+                                    </div> <!--end::Small Box Widget 1-->
+                                </div> <!--end::Col-->
+                                <div class="col-lg-3 col-6"> <!--begin::Small Box Widget 1-->
+                                    <div class="small-box text-bg-dark">
+                                        <div class="inner">
+                                            <h3> {{$productos}}</h3>
+                                            <p>Productos</p>
+                                        </div> <span class="material-icons small-box-icon"
+                                            style="font-size: 100px">inventory</span><a
+                                            href="{{route('ventas.index')}}"
+                                            class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                                            Ver más <i class="bi bi-link-45deg"></i> </a>
+                                    </div> <!--end::Small Box Widget 1-->
+                                </div> <!--end::Col-->
+                                <div class="col-lg-3 col-6"> <!--begin::Small Box Widget 1-->
+                                    <div class="small-box text-bg-info">
+                                        <div class="inner">
+                                            <h3>{{$dollar}}</h3>
+                                            <p>Dolar</p>
+                                        </div> <span class="material-icons small-box-icon"
+                                            style="font-size: 100px">attach_money</span><a
+                                            href="{{route('ventas.index')}}"
+                                            class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                                            Ver más <i class="bi bi-link-45deg"></i> </a>
+                                    </div> <!--end::Small Box Widget 1-->
+                                </div> <!--end::Col-->
 
-                                <div class="col-md-3">
-                                    <div class="card-dash bg-info">
-                                        <div class="title d-flex justify-content-left align-items-left">
-                                            <p class="title-text">
-                                                Total Compras
-                                            </p>
-                                            <span class="material-icons" style="font-size: 100px">shopping_bag</span>
-                                            <!-- Nuevo ícono -->
-                                        </div>
-                                        <div class="data">
-                                            <p>
-                                                {{$compras}}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
 
-                                <div class="col-md-3">
-                                    <div class="card-dash bg-primary">
-                                        <div class="title d-flex justify-content-left align-items-left">
-                                            <p class="title-text">
-                                                Total Productos
-                                            </p>
-                                            <span class="material-icons" style="font-size: 100px">inventory</span>
-                                            <!-- Nuevo ícono -->
-                                        </div>
-                                        <div class="data">
-                                            <p>
-                                               {{$productos}}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
 
-                                <div class="col-md-3">
-                                    <div class="card-dash bg-dark text-white">
-                                        <div class="title d-flex justify-content-left align-items-left">
-                                            <p class="title-text">
-                                                Tasa del dolar
-                                            </p>
-                                            <span class="material-icons" style="font-size: 100px">attach_money</span>
-                                            <!-- Icono actualizado -->
-                                        </div>
-                                        <div class="data">
-                                            <p>
-                                               {{$dollar}}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
 
                             <div class="row mt-4">
-                                <div class="col-md-3">
-                                    <div class="card-dash bg-info">
-                                        <div class="title d-flex justify-content-left align-items-left">
-                                            <p class="title-text">
-                                                Toal Pagos
-                                            </p>
-                                            <span class="material-icons" style="font-size: 100px">payments</span>
-                                            <!-- Nuevo ícono -->
-                                        </div>
-                                        <div class="data">
-                                            <p>
-                                                {{$pagos}}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
+                                <div class="col-lg-3 col-6"> <!--begin::Small Box Widget 1-->
+                                    <div class="small-box text-bg-secondary">
+                                        <div class="inner">
+                                            <h3>{{$proveedores}}</h3>
+                                            <p>Proveedores</p>
+                                        </div> <span class="material-icons small-box-icon"
+                                            style="font-size: 100px">assured_workload</span><a
+                                            href="{{route('ventas.index')}}"
+                                            class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                                            Ver más <i class="bi bi-link-45deg"></i> </a>
+                                    </div> <!--end::Small Box Widget 1-->
+                                </div> <!--end::Col-->
 
-                                <div class="col-md-3">
-                                    <div class="card-dash bg-dark">
-                                        <div class="title d-flex justify-content-left align-items-left">
-                                            <p class="title-text">
-                                                Proveedores
-                                            </p>
-                                            <span class="material-icons" style="font-size: 100px">build</span>
-                                            <!-- Nuevo ícono -->
-                                        </div>
-                                        <div class="data">
-                                            <p>
-                                               {{$proveedores}}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
+                                <div class="col-lg-3 col-6"> <!--begin::Small Box Widget 1-->
+                                    <div class="small-box text-bg-warning">
+                                        <div class="inner">
+                                            <h3>{{$usuarios}}</h3>
+                                            <p>Usuarios</p>
+                                        </div> <span class="material-icons small-box-icon"
+                                            style="font-size: 100px">shopping_bag</span><a
+                                            href="{{route('ventas.index')}}"
+                                            class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                                            Ver más <i class="bi bi-link-45deg"></i> </a>
+                                    </div> <!--end::Small Box Widget 1-->
+                                </div> <!--end::Col-->
 
-                                <div class="col-md-3">
-                                    <div class="card-dash bg-danger">
-                                        <div class="title d-flex justify-content-left align-items-left">
-                                            <p class="title-text">
-                                                Cuentas por Cobrar
-                                            </p>
-                                            <span class="material-icons" style="font-size: 100px"><span
-                                                    class="material-symbols-outlined">
-                                                    account_balance
-                                                </span></span>
-                                            <!-- Nuevo ícono -->
-                                        </div>
-                                        <div class="data">
-                                            <p>
-                                                {{$creditos}}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
+                                <div class="col-lg-3 col-6"> <!--begin::Small Box Widget 1-->
+                                    <div class="small-box text-bg-danger">
+                                        <div class="inner">
+                                            <h3>{{$deudas}}</h3>
+                                            <p>Cuentas por pagar</p>
+                                        </div> <span class="material-icons small-box-icon"
+                                            style="font-size: 100px">payments</span><a
+                                            href="{{route('ventas.index')}}"
+                                            class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                                            Ver más <i class="bi bi-link-45deg"></i> </a>
+                                    </div> <!--end::Small Box Widget 1-->
+                                </div> <!--end::Col-->
 
-                                <div class="col-md-3">
-                                    <div class="card-dash bg-secondary text-white">
-                                        <div class="title d-flex justify-content-left align-items-left">
-                                            <p class="title-text">
-                                                Cuentas por Pagar
-                                            </p>
-                                            <span class="material-icons" style="font-size: 100px">
-                                                card_travel
-                                            </span>
-                                            <!-- Icono actualizado -->
-                                        </div>
-                                        <div class="data">
-                                            <p>
-                                                {{$deudas}}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
+                                <div class="col-lg-3 col-6"> <!--begin::Small Box Widget 1-->
+                                    <div class="small-box text-bg-success">
+                                        <div class="inner">
+                                            <h3>{{$creditos}}</h3>
+                                            <p>Cuentas por cobrar</p>
+                                        </div> <span class="material-icons small-box-icon"
+                                            style="font-size: 100px">account_balance_wallet</span><a
+                                            href="{{route('ventas.index')}}"
+                                            class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                                            Ver más <i class="bi bi-link-45deg"></i> </a>
+                                    </div> <!--end::Small Box Widget 1-->
+                                </div> <!--end::Col-->
                             </div>
                         </div> <!--end::Inner for combined box-->
                     </div> <!--end::Small Box for combined box-->

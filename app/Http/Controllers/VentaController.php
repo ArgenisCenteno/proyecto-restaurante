@@ -196,49 +196,48 @@ class VentaController extends Controller
 
     public function generarVenta(Request $request)
     {
+       // dd("test");
         $caja = Caja::find(1);
-      
-        if(!$caja){
+    
+        if (!$caja) {
             Alert::error('¡Error!', 'No hay caja disponible')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
             return redirect()->back();
-
         }
-
+    
         $apertura = AperturaCaja::where('caja_id', $caja->id)->where('estado', 'Operando')->first();
-        if(!$apertura){
+        if (!$apertura) {
             Alert::error('¡Error!', 'No existe una caja abierta')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
             return redirect()->back();
         }
+    
         if ($request->productos == [] || $request->productos == null) {
             Alert::error('¡Error!', 'Para realizar una venta es necesario agregar productos')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
             return redirect()->back();
         }
-        //obtener datos
+    
+        // Obtener datos
         $productos = json_decode($request->productos, true);
         $metodos = json_decode($request->metodos_pago, true);
-
-
-        //calcular el monto total, monto neto e impuestos
-
+    
+        // Verificar si existe un método de pago "A crédito"
+        $metodoCredito = collect($metodos)->firstWhere('metodo', 'A credito');
+    
+        // Calcular el monto total y neto
         $totalNeto = 0;
         $montoTotal = 0;
         $impuestosTotal = 0;
-
+    
         foreach ($productos as $producto) {
             $productoModel = Producto::find($producto['id']);
             if ($productoModel->cantidad < $producto['cantidad']) {
-                // Obtener el nombre del producto
-                $nombreProducto = $productoModel->nombre; // Asumiendo que 'nombre' es el campo que contiene el nombre del producto
-            
-                // Mostrar un mensaje de error con el nombre del producto
+                $nombreProducto = $productoModel->nombre;
                 Alert::error('¡Error!', "Stock insuficiente para el producto: $nombreProducto")
                     ->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
-            
                 return redirect()->back();
             }
-            
+    
             $totalNeto += $producto['precio'] * $producto['cantidad'];
-
+    
             if ($producto['aplicaIva'] == 1) {
                 $montoTotal += $producto['cantidad'] * $producto['precio'] * 1.16;
                 $impuestosTotal += ($producto['precio'] * 0.16) * $producto['cantidad'];
@@ -246,92 +245,127 @@ class VentaController extends Controller
                 $montoTotal += $producto['precio'] * $producto['cantidad'];
             }
         }
-
-
+    
         $userId = Auth::id();
+    
+        // Si el método es "A crédito", generar la CuentaPorCobrar y guardar la venta como "Pendiente"
+        if ($metodoCredito) {
+            $venta = new Venta();
+            $venta->user_id = $request->user_id;
+            $venta->vendedor_id = $userId;
+            $venta->monto_total = $montoTotal;
+            $venta->status = 'Pendiente'; // Venta pendiente
+            $venta->save();
+    
+            $cuentaPorCobrar = new CuentaPorCobrar();
+            $cuentaPorCobrar->tipo = 'A crédito';
+            $cuentaPorCobrar->descripcion = 'Venta a crédito';
+            $cuentaPorCobrar->venta_id = $venta->id;
+            $cuentaPorCobrar->monto = $montoTotal;
+            $cuentaPorCobrar->estado = 'Pendiente';
+            $cuentaPorCobrar->save();
+    
+            // Registrar detalles de la venta
+            foreach ($productos as $producto) {
+                $detalleVenta = new DetalleVenta();
+                $detalleVenta->id_producto = $producto['id'];
+                $detalleVenta->precio_producto = $producto['precio'];
+                $detalleVenta->cantidad = $producto['cantidad'];
+                $detalleVenta->neto = $producto['precio'] * $producto['cantidad'];
+                $detalleVenta->impuesto = ($producto['aplicaIva'] == 1) ? ($producto['precio'] * 0.16) * $producto['cantidad'] : 0;
+                $detalleVenta->id_venta = $venta->id;
+                $detalleVenta->save();
+    
+                // Actualizar stock
+                $productoModel = Producto::find($producto['id']);
+                if ($productoModel) {
+                    $productoModel->cantidad -= $producto['cantidad'];
+                    $productoModel->save();
+                }
+            }
+    
+            Alert::success('¡Éxito!', 'Venta a crédito generada exitosamente')
+                ->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
+            return redirect()->back();
+        }else{
+    
+            $pago = new Pago();
+            $pago->status = 'Pagado';
+            $pago->tipo = 'Venta Regular';
+            $pago->forma_pago = json_encode($metodos);
+            $pago->monto_total = $montoTotal;
+            $pago->monto_neto = $totalNeto;
+            $pago->tasa_dolar = $request->tasa;
+            $pago->creado_id = $userId;
+            $pago->fecha_pago = Carbon::now()->format('Y-m-d');
+            $pago->impuestos = $impuestosTotal;
+            $pago->save();
 
-        //registrar pago
+            $venta = new Venta();
+            $venta->user_id = $request->user_id;
+            $venta->pago_id = $pago->id;
+            $venta->vendedor_id = $userId;
+            $venta->monto_total = $montoTotal;
+            $venta->status = 'Pagado'; // Venta pendiente
+            $venta->save();
 
-        $pago = new Pago();
-        $pago->status = 'Pagado';
-        $pago->tipo = 'Venta Regular';
-        $pago->forma_pago = json_encode($metodos);
-        $pago->monto_total = $montoTotal;
-        $pago->monto_neto = $totalNeto;
-        $pago->tasa_dolar = $request->tasa;
-        $pago->creado_id = $userId;
-        $pago->fecha_pago = Carbon::now()->format('Y-m-d');
-        $pago->impuestos = $impuestosTotal;
-        $pago->save();
-
-        //registrar venta
-        $venta = new Venta();
-        $venta->user_id = $request->user_id;
-        $venta->vendedor_id = $userId;
-        $venta->monto_total = $montoTotal;
-        $venta->status = 'Pagado';
-        $venta->pago_id = $pago->id;
-        $venta->save();
-
-        // Registrar detalles ventas
-        foreach ($productos as $producto) {
-
-
-
-            $detalleVenta = new DetalleVenta();
-            $detalleVenta->id_producto = $producto['id'];
-            $detalleVenta->precio_producto = $producto['precio'];
-            $detalleVenta->cantidad = $producto['cantidad'];
-            $detalleVenta->neto = $producto['precio'] * $producto['cantidad'];
-            $detalleVenta->impuesto = ($producto['aplicaIva'] == 1) ? ($producto['precio'] * 0.16) * $producto['cantidad'] : 0;
-            $detalleVenta->id_venta = $venta->id;
-            $detalleVenta->save();
-
-            // Actualizar stock
-            $productoModel = Producto::find($producto['id']);
-            if ($productoModel) {
-                $productoModel->cantidad -= $producto['cantidad'];
-                $productoModel->save();
+            foreach ($productos as $producto) {
+                $detalleVenta = new DetalleVenta();
+                $detalleVenta->id_producto = $producto['id'];
+                $detalleVenta->precio_producto = $producto['precio'];
+                $detalleVenta->cantidad = $producto['cantidad'];
+                $detalleVenta->neto = $producto['precio'] * $producto['cantidad'];
+                $detalleVenta->impuesto = ($producto['aplicaIva'] == 1) ? ($producto['precio'] * 0.16) * $producto['cantidad'] : 0;
+                $detalleVenta->id_venta = $venta->id;
+                $detalleVenta->save();
+    
+                // Actualizar stock
+                $productoModel = Producto::find($producto['id']);
+                if ($productoModel) {
+                    $productoModel->cantidad -= $producto['cantidad'];
+                    $productoModel->save();
+                }
+            }
+            
+            $recibo = new Recibo();
+            $recibo->tipo = 'Venta';
+            $recibo->monto = $montoTotal;
+            $recibo->estatus = 'Pagado';
+            $recibo->pago_id = $pago->id;
+            $recibo->user_id = $request->user_id;
+            $recibo->activo = 1;
+            $recibo->creado_id = $userId;
+            $recibo->descuento = $request->descuento;
+            $recibo->save();
+    
+            //caja
+    
+            foreach ($metodos as $metodo) {
+                $transaccion = new Transaccion();
+                $transaccion->caja_id = 1;
+                $transaccion->usuario_id = $userId;
+                $transaccion->tipo = 'VENTA';
+                $transaccion->apertura_id  = $apertura->id;
+                $transaccion->venta_id  = $venta->id;
+                $transaccion->metodo_pago = $metodo['metodo'];
+                if ($metodo['metodo'] == 'Divisa') {
+                    $transaccion->moneda = 'Dollar';
+                    $transaccion->monto_total_dolares = $metodo['monto_dollar'] ?? 0;
+                    $transaccion->monto_total_bolivares = 0;
+                } else {
+                    $transaccion->moneda = 'Bolívar';
+                    $transaccion->monto_total_bolivares = $metodo['monto_bs'] ?? 0;
+                    $transaccion->monto_total_dolares = 0;
+                }
+                $transaccion->fecha = Carbon::now();
+                $transaccion->save();
             }
         }
-
-        $recibo = new Recibo();
-        $recibo->tipo = 'Venta';
-        $recibo->monto = $montoTotal;
-        $recibo->estatus = 'Pagado';
-        $recibo->pago_id = $pago->id;
-        $recibo->user_id = $request->user_id;
-        $recibo->activo = 1;
-        $recibo->creado_id = $userId;
-        $recibo->descuento = $request->descuento;
-        $recibo->save();
-
-        //caja
-
-        foreach ($metodos as $metodo) {
-            $transaccion = new Transaccion();
-            $transaccion->caja_id = 1;
-            $transaccion->usuario_id = $userId;
-            $transaccion->tipo = 'VENTA';
-            $transaccion->apertura_id  = $apertura->id;
-            $transaccion->venta_id  = $venta->id;
-            $transaccion->metodo_pago = $metodo['metodo'];
-            if ($metodo['metodo'] == 'Divisa') {
-                $transaccion->moneda = 'Dollar';
-                $transaccion->monto_total_dolares = $metodo['monto_dollar'] ?? 0;
-                $transaccion->monto_total_bolivares = 0;
-            } else {
-                $transaccion->moneda = 'Bolívar';
-                $transaccion->monto_total_bolivares = $metodo['monto_bs'] ?? 0;
-                $transaccion->monto_total_dolares = 0;
-            }
-            $transaccion->fecha = Carbon::now();
-            $transaccion->save();
-        }
-
+    
         Alert::success('¡Exito!', 'Venta generada exitosamente')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
-        return redirect()->back();
+        return redirect()->route('ventas.index');
     }
+    
 
     public function destroy($id)
     {

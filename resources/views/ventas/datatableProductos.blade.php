@@ -1,16 +1,16 @@
 <div class="text-center mt-4 card pt-2 pb-2 bg-dark text-white"
-            style="box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;">
-            <h3>Productos</h3>
+    style="box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;">
+    <h3>Productos</h3>
 
 
- 
-        </div>
-        <hr />
+
+</div>
+<hr />
 <div class="table-responsive">
     <table class="table table-hover" id="productos-table2">
         <thead class="bg-light">
             <tr>
-            <th></th>
+                <th></th>
                 <th>Nombre</th>
                 <th>Costo</th>
                 <th> IVA</th>
@@ -23,7 +23,9 @@
         </tbody>
     </table>
 </div>
+<div class="productoCarrito" id="productoCarrito" class="mt-3">
 
+        </div>
 
 @section('js')
 @include('layout.script')
@@ -44,13 +46,13 @@
             type: "POST",
             columns: [
                 {
-                data: 'imagenes', // Asumiendo que 'imagenes' es un array con las imágenes del producto
-                name: 'imagenes',
-                render: function (data) {
-                    // Verificamos si hay imágenes y devolvemos la primera
-                    return data.length > 0 ? `<img src="${data[0].url}" alt="Imagen" style="width: 100px; height: auto;">` : 'Sin imagen'; // Cambia 'url' por el campo correcto de tu objeto de imagen
-                }
-            },
+                    data: 'imagenes', // Asumiendo que 'imagenes' es un array con las imágenes del producto
+                    name: 'imagenes',
+                    render: function (data) {
+                        // Verificamos si hay imágenes y devolvemos la primera
+                        return data.length > 0 ? `<img src="${data[0].url}" alt="Imagen" style="width: 100px; height: auto;">` : 'Sin imagen'; // Cambia 'url' por el campo correcto de tu objeto de imagen
+                    }
+                },
                 { data: 'nombre', name: 'nombre' },
                 { data: 'precio_venta', name: 'precio_venta' },
                 {
@@ -110,11 +112,11 @@
                             })
                             return;
                         }
-
+                        let dolar = $("#tasa").val();
                         const productName = producto.nombre;
-                        const productPrice = producto.precio_venta;
+                        const productPrice = producto.precio_venta * dolar;
                         const productIva = producto.aplica_iva ? 'Sí' : 'No';
-                        var precioProductoIva = producto.precio_venta;
+                        var precioProductoIva = producto.precio_venta * dolar;
                         if (productIva == 'Sí') {
                             var precioProductoIva = productPrice * 1.16;
                         } else {
@@ -193,13 +195,13 @@
             actualizarProductosInput();
 
             Swal.fire({
-                            title: 'Producto Descartado',
-                            text: "Se ha descatado un producto del carrito.",
-                            icon: 'success',
-                            showCancelButton: false,
-                            confirmButtonColor: '#3085d6',
-                            cancelButtonColor: '#d33'
-                        })
+                title: 'Producto Descartado',
+                text: "Se ha descatado un producto del carrito.",
+                icon: 'success',
+                showCancelButton: false,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33'
+            })
         });
 
         $(document).on('change', '.cantidadProducto', function () {
@@ -233,7 +235,8 @@
         // Función para calcular el total de la venta
         function calcularTotal() {
             let total = 0;
-
+            let totalD = 0;
+            let dolar = $('#tasa').val();
             // Iterar sobre cada producto en el carrito
             $('.productoCarrito').each(function () {
                 const productId = $(this).attr('id').split('_')[1];
@@ -253,15 +256,15 @@
                     }
 
                     total += subtotalProducto;
-
+                    totalD += subtotalProducto / dolar;
                 }
             });
 
 
 
             // Mostrar el total calculado
-            $('.totalVenta').text('$' + total.toFixed(2));
-
+            $('.totalVenta').text('Bs' + total.toFixed(2));
+            $('.totalVentaBs').text('$' + totalD.toFixed(2));
         }
 
         function actualizarProductosInput() {
@@ -302,8 +305,8 @@
             $('#btnSubmit').prop('disabled', false).removeClass('btn-danger').addClass('btn-primary');
 
         }
-        let totalVenta = parseFloat($('#totalVenta').text().replace('$', ''));
-        let cancelado = parseFloat($('#cancelado').text().replace('$', ''));
+        let totalVenta = parseFloat($('#totalVenta').text().replace('Bs', ''));
+        let cancelado = parseFloat($('#cancelado').text().replace('Bs', ''));
 
         if (cancelado + montoBs > totalVenta) {
             $('#advertencia').show();
@@ -322,7 +325,7 @@
             };
 
             metodosPago.push(metodo);
-            $('#cancelado').text('$' + cancelado.toFixed(2));
+            $('#cancelado').text('Bs' + cancelado.toFixed(2));
 
             // Check if total is paid
             if (cancelado >= totalVenta) {
@@ -393,8 +396,8 @@
         });
 
         // Actualizar en el DOM
-        let totalVenta = parseFloat($('#totalVenta').text().replace('$', ''));
-        $('#cancelado').text('$' + totalCancelado.toFixed(2));
+        let totalVenta = parseFloat($('#totalVenta').text().replace('Bs', ''));
+        $('#cancelado').text('Bs' + totalCancelado.toFixed(2));
         $('#restante').text((totalCancelado - totalVenta).toFixed(2));
 
 

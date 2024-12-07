@@ -39,4 +39,9 @@ class CuentaPorPagar extends Model
     {
         return $this->belongsTo(Pago::class);
     }
+
+    public function compra()
+    {
+        return $this->belongsTo(Compra::class);
+    }
 }

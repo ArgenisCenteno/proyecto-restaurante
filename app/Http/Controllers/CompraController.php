@@ -58,6 +58,7 @@ class CompraController extends Controller
                     $deleteUrl = route('compras.destroy', $row->id);
                     $pdfUrl = route('compras.pdf', $row->id); // Asegúrate de que la ruta esté correcta
                     return '
+                    <a href="' . $viewUrl . '" class="btn btn-info btn-sm">Ver</a>
                             <a href="' . $pdfUrl . '" class="btn btn-success btn-sm" target="_blank">Recibo</a>
                            <form action="' . $deleteUrl . '"  method="POST" style="display:inline; " class="btn-delete">
                             ' . csrf_field() . '
@@ -110,7 +111,33 @@ class CompraController extends Controller
 
     public function comprar(Request $request)
     {
-        $dollar = Tasa::where('name', 'Dollar')->where('status', 'Activo')->first();
+        function isConnected()
+        {
+            $connected = @fsockopen("www.google.com", 80); // Intenta conectar al puerto 80 de Google
+            if ($connected) {
+                fclose($connected);
+                return true; // Hay conexión
+            }
+            return false; // No hay conexión
+        }
+
+        if (isConnected()) {
+            $response = file_get_contents("https://ve.dolarapi.com/v1/dolares/oficial");
+          
+        } else {
+             
+            $response = false;
+        }
+ 
+
+
+        // dd();
+        if ($response) {
+            $dato = json_decode($response);
+            $dollar = $dato->promedio;
+        } else {
+            $dollar = 44.30;
+        }
         $users = Proveedor::pluck('razon_social', 'id');
 
         return view('compras.comprar')->with('dollar', $dollar)->with('users', $users);
@@ -162,154 +189,136 @@ class CompraController extends Controller
     }
 
     public function generarCompra(Request $request)
-    {
-
-        if ($request->producto == [] || $request->producto == null) {
-            Alert::error('¡Error!', 'Para realizar una Compra es necesario agregar productos')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
-        }
-        //obtener datos
-        $productos = json_decode($request->productos, true);
-        $metodos = json_decode($request->metodos_pago, true);
-
-
-        //calcular el monto total, monto neto e impuestos
-
-        $totalNeto = 0;
-        $montoTotal = 0;
-        $impuestosTotal = 0;
-
-        foreach ($productos as $producto) {
-            $totalNeto += $producto['precio'] * $producto['cantidad'];
-
-            if ($producto['aplicaIva'] == 1) {
-                $montoTotal += $producto['cantidad'] * $producto['precio'] * 1.16;
-                $impuestosTotal += ($producto['precio'] * 0.16) * $producto['cantidad'];
-            } else {
-                $montoTotal += $producto['precio'] * $producto['cantidad'];
-            }
-        }
-
-
-        $userId = Auth::id();
-
-        // dd($request->metodoPago != 'A credito');
-        //registrar pago
-        if ($request->metodoPago != 'A credito') {
-            $estatus = 'Pagado';
-
-            $pago = new Pago();
-            $pago->status = $estatus;
-            $pago->tipo = 'Compra';
-            $pago->forma_pago = $request->metodoPago;
-
-
-            $pago->monto_total = $montoTotal;
-            $pago->monto_neto = $totalNeto;
-            $pago->tasa_dolar = $request->tasa;
-            $pago->creado_id = $userId;
-            $pago->fecha_pago = Carbon::now()->format('Y-m-d');
-            $pago->impuestos = $impuestosTotal;
-            $pago->save();
-
-            //registrar Compra
-            $Compra = new Compra();
-            $Compra->user_id = $userId;
-            $Compra->proveedor_id = $request->user_id;
-            $Compra->monto_total = $montoTotal;
-            $Compra->status = $estatus;
-            $Compra->pago_id = $pago->id;
-            $Compra->save();
-
-
-
-
-            // Registrar detalles Compras
-            foreach ($productos as $producto) {
-
-
-
-                $detalleCompra = new DetalleCompra();
-                $detalleCompra->id_producto = $producto['id'];
-                $detalleCompra->precio_producto = $producto['precio'];
-                $detalleCompra->cantidad = $producto['cantidad'];
-                $detalleCompra->neto = $producto['precio'] * $producto['cantidad'];
-                $detalleCompra->impuesto = ($producto['aplicaIva'] == 1) ? ($producto['precio'] * 0.16) * $producto['cantidad'] : 0;
-                $detalleCompra->id_Compra = $Compra->id;
-                $detalleCompra->save();
-
-                // Actualizar stock
-                $productoModel = Producto::find($producto['id']);
-                if ($productoModel) {
-                    $productoModel->cantidad += $producto['cantidad'];
-                    $productoModel->save();
-                }
-            }
-
-            $recibo = new Recibo();
-            $recibo->tipo = 'Compra';
-            $recibo->monto = $montoTotal;
-            $recibo->estatus = $estatus;
-            $recibo->pago_id = $pago->id;
-            $recibo->user_id = $request->user_id;
-            $recibo->activo = 1;
-            $recibo->creado_id = $userId;
-            $recibo->descuento = $request->descuento;
-            $recibo->save();
-        } else {
-            $estatus = 'Pendiente';
-            //registrar Compra
-            $Compra = new Compra();
-            $Compra->user_id = $userId;
-            $Compra->proveedor_id = $request->user_id;
-            $Compra->monto_total = $montoTotal;
-            $Compra->status = $estatus;
-            // $Compra->pago_id = $pago->id;
-            $Compra->save();
-
-            $cuenta = new CuentaPorPagar();
-            $cuenta->tipo = "Compra de Mercancía";
-            $cuenta->descripcion = "Compra de mercancía a proveedores";
-            $cuenta->proveedor_id = $request->user_id;
-            $cuenta->user_id = Auth::user()->id;
-            $cuenta->monto = $montoTotal;
-            $cuenta->estado = $estatus;
-            $cuenta->compra_id = $Compra->id;
-            $cuenta->save();
-
-
-
-
-
-            // Registrar detalles Compras
-            foreach ($productos as $producto) {
-
-
-
-                $detalleCompra = new DetalleCompra();
-                $detalleCompra->id_producto = $producto['id'];
-                $detalleCompra->precio_producto = $producto['precio'];
-                $detalleCompra->cantidad = $producto['cantidad'];
-                $detalleCompra->neto = $producto['precio'] * $producto['cantidad'];
-                $detalleCompra->impuesto = ($producto['aplicaIva'] == 1) ? ($producto['precio'] * 0.16) * $producto['cantidad'] : 0;
-                $detalleCompra->id_Compra = $Compra->id;
-                $detalleCompra->save();
-
-                // Actualizar stock
-                $productoModel = Producto::find($producto['id']);
-                if ($productoModel) {
-                    $productoModel->cantidad += $producto['cantidad'];
-                    $productoModel->save();
-                }
-            }
-        }
-
-
-
-
-
-        Alert::success('¡Exito!', 'Compra generada exitosamente')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
+{ 
+    if ($request->productos == null) {
+        Alert::error('¡Error!', 'Para realizar una Compra es necesario agregar productos')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
         return redirect()->back();
     }
+
+    // Obtener datos
+    $productos = json_decode($request->productos, true);
+    $metodos = json_decode($request->metodos_pago, true);
+
+    // Calcular montos
+    $totalNeto = 0;
+    $montoTotal = 0;
+    $impuestosTotal = 0;
+
+    foreach ($productos as $producto) {
+        $totalNeto += $producto['precio'] * $producto['cantidad'];
+        if ($producto['aplicaIva'] == 1) {
+            $montoTotal += $producto['cantidad'] * $producto['precio'] * 1.16;
+            $impuestosTotal += ($producto['precio'] * 0.16) * $producto['cantidad'];
+        } else {
+            $montoTotal += $producto['precio'] * $producto['cantidad'];
+        }
+    }
+
+    $userId = Auth::id();
+
+    // Verificar si el método de pago es "A crédito"
+    $metodoCredito = collect($metodos)->firstWhere('metodo', 'A credito');
+ 
+    if ($metodoCredito) {
+        $estatus = 'Pendiente';
+
+        // Registrar la Compra
+        $Compra = new Compra();
+        $Compra->user_id = $userId;
+        $Compra->proveedor_id = $request->user_id;
+        $Compra->monto_total = $montoTotal;
+        $Compra->status = $estatus;
+        $Compra->save();
+
+        // Registrar Cuenta por Pagar
+        $cuenta = new CuentaPorPagar();
+        $cuenta->tipo = "Compra de Mercancía";
+        $cuenta->descripcion = "Compra de mercancía a proveedores";
+        $cuenta->proveedor_id = $request->user_id;
+        $cuenta->user_id = $userId;
+        $cuenta->monto = $montoTotal;
+        $cuenta->estado = $estatus;
+        $cuenta->compra_id = $Compra->id;
+        $cuenta->save();
+
+        // Registrar detalles de la Compra y actualizar stock
+        foreach ($productos as $producto) {
+            $detalleCompra = new DetalleCompra();
+            $detalleCompra->id_producto = $producto['id'];
+            $detalleCompra->precio_producto = $producto['precio'];
+            $detalleCompra->cantidad = $producto['cantidad'];
+            $detalleCompra->neto = $producto['precio'] * $producto['cantidad'];
+            $detalleCompra->impuesto = ($producto['aplicaIva'] == 1) ? ($producto['precio'] * 0.16) * $producto['cantidad'] : 0;
+            $detalleCompra->id_Compra = $Compra->id;
+            $detalleCompra->save();
+
+            // Actualizar stock
+            $productoModel = Producto::find($producto['id']);
+            if ($productoModel) {
+                $productoModel->cantidad += $producto['cantidad'];
+                $productoModel->save();
+            }
+        }
+    } else {
+        $estatus = 'Pagado';
+
+        // Registrar Pago
+        $pago = new Pago();
+        $pago->status = $estatus;
+        $pago->tipo = 'Compra';
+        $pago->forma_pago = json_encode($metodos);
+        $pago->monto_total = $montoTotal;
+        $pago->monto_neto = $totalNeto;
+        $pago->tasa_dolar = $request->tasa;
+        $pago->creado_id = $userId;
+        $pago->fecha_pago = Carbon::now()->format('Y-m-d');
+        $pago->impuestos = $impuestosTotal;
+        $pago->save();
+
+        // Registrar Compra
+        $Compra = new Compra();
+        $Compra->user_id = $userId;
+        $Compra->proveedor_id = $request->user_id;
+        $Compra->monto_total = $montoTotal;
+        $Compra->status = $estatus;
+        $Compra->pago_id = $pago->id;
+        $Compra->save();
+
+        // Registrar detalles de la Compra y actualizar stock
+        foreach ($productos as $producto) {
+            $detalleCompra = new DetalleCompra();
+            $detalleCompra->id_producto = $producto['id'];
+            $detalleCompra->precio_producto = $producto['precio'];
+            $detalleCompra->cantidad = $producto['cantidad'];
+            $detalleCompra->neto = $producto['precio'] * $producto['cantidad'];
+            $detalleCompra->impuesto = ($producto['aplicaIva'] == 1) ? ($producto['precio'] * 0.16) * $producto['cantidad'] : 0;
+            $detalleCompra->id_Compra = $Compra->id;
+            $detalleCompra->save();
+
+            // Actualizar stock
+            $productoModel = Producto::find($producto['id']);
+            if ($productoModel) {
+                $productoModel->cantidad += $producto['cantidad'];
+                $productoModel->save();
+            }
+        }
+
+        // Registrar Recibo
+        $recibo = new Recibo();
+        $recibo->tipo = 'Compra';
+        $recibo->monto = $montoTotal;
+        $recibo->estatus = $estatus;
+        $recibo->pago_id = $pago->id;
+        $recibo->user_id = $request->user_id;
+        $recibo->activo = 1;
+        $recibo->creado_id = $userId;
+        $recibo->descuento = $request->descuento;
+        $recibo->save();
+    }
+
+    Alert::success('¡Éxito!', 'Compra generada exitosamente')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
+    return redirect()->back();
+}
 
     public function destroy($id)
     {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\CuentasPorPagarExport;
 use App\Models\Compra;
 use App\Models\CuentaPorPagar;
 use App\Models\Pago;
@@ -10,6 +11,7 @@ use Auth;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Alert;
+use Maatwebsite\Excel\Facades\Excel;
 class CuentaPorPagarController extends Controller
 {
     // Mostrar todas las cuentas por pagar
@@ -104,5 +106,18 @@ class CuentaPorPagarController extends Controller
         $cuenta = CuentaPorPagar::findOrFail($id);
         $cuenta->delete();
         return redirect()->route('cuentas-por-pagar.index')->with('success', 'Cuenta por pagar eliminada con éxito.');
+    }
+
+    public function exportarCuentasPorPagar(Request $request)
+    {
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
+
+           $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        return Excel::download(new CuentasPorPagarExport($startDate, $endDate), 'cuentas_por_pagar.xlsx');
     }
 }

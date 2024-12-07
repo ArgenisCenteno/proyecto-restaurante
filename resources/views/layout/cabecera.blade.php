@@ -43,7 +43,14 @@
               <li><a href="{{ route('compras.index') }}">Historial</a></li>
             </ul>
           </li>
-          <li><a href="{{ route('almacen') }}">Productos</a></li>
+          <li class="dropdown">
+            <a href="#"><span>Ventas</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+            <li><a href="{{ route('almacen') }}">Productos</a></li>
+            <li><a href="{{ route('productos.create') }}">Nuevo Producto</a></li>
+            </ul>
+          </li>
+         
          
           <li class="dropdown">
             <a href="#"><span>Transacciones</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>

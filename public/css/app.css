@@ -576,3 +576,14 @@
     margin-top: 80px;
   }
  
+  
+    table th, table td {
+        text-align: center; /* Centra horizontalmente */
+        vertical-align: middle; /* Centra verticalmente */
+       
+    }
+ 
+     th{
+      background-color: #008374 !important;
+      color: whitesmoke;
+    }

@@ -1,3 +1,11 @@
+<div class="text-center mt-4 card pt-2 pb-2 bg-dark text-white"
+            style="box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;">
+            <h3>Productos</h3>
+
+
+ 
+        </div>
+        <hr />
 <div class="table-responsive">
     <table class="table table-hover" id="productos-table2">
         <thead class="bg-light">
@@ -15,7 +23,8 @@
         </tbody>
     </table>
 </div>
-
+<div class="productoCarrito" id="productoCarrito" class="mt-3">
+</div>
 
 @section('js')
 @include('layout.script')
@@ -91,7 +100,7 @@
                     if (response.success) {
                         const producto = response.producto;
 
-                        if (producto.cantidad == 0 || producto.cantidad < 0) {
+                     /*   if (producto.cantidad == 0 || producto.cantidad < 0) {
                             Swal.fire({
                                 title: 'Sin stock',
                                 text: "Este producto no está disponible.",
@@ -101,12 +110,12 @@
                                 cancelButtonColor: '#d33'
                             })
                             return;
-                        }
-
+                        }*/
+                        let dolar = $("#tasa").val();
                         const productName = producto.nombre;
-                        const productPrice = producto.precio_compra;
+                        const productPrice = producto.precio_compra * dolar;
                         const productIva = producto.aplica_iva ? 'Sí' : 'No';
-                        var precioProductoIva = producto.precio_compra;
+                        var precioProductoIva = producto.precio_compra * dolar;
                         if (productIva == 'Sí') {
                             var precioProductoIva = productPrice * 1.16;
                         } else {
@@ -198,7 +207,17 @@
             const productId = $(this).attr('id').split('_')[1]; // Obtener el ID del producto
             const nuevaCantidad = parseInt($(this).val());
             const stockDisponible = parseInt($(`#stock_${productId}`).val()); // Obtener el stock disponible
-           
+            /*if (nuevaCantidad > stockDisponible) {
+                Swal.fire({
+                    title: 'Sin disponibilidad suficiente',
+                    text: "No hay disponibilidad suficiente actualmente",
+                    icon: 'info',
+                    showCancelButton: false,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33'
+                })
+                $(this).val(stockDisponible);
+            }*/
 
             // Actualizar la cantidad en el array
             productosEnCarrito = productosEnCarrito.map(function (producto) {
@@ -215,7 +234,8 @@
         // Función para calcular el total de la venta
         function calcularTotal() {
             let total = 0;
-
+            let totalD = 0;
+            let dolar = $('#tasa').val();
             // Iterar sobre cada producto en el carrito
             $('.productoCarrito').each(function () {
                 const productId = $(this).attr('id').split('_')[1];
@@ -235,15 +255,15 @@
                     }
 
                     total += subtotalProducto;
-
+                    totalD += subtotalProducto / dolar;
                 }
             });
 
 
 
             // Mostrar el total calculado
-            $('.totalVenta').text('$' + total.toFixed(2));
-
+            $('.totalVenta').text('Bs' + total.toFixed(2));
+            $('.totalVentaBs').text('$' + totalD.toFixed(2));
         }
 
         function actualizarProductosInput() {
@@ -265,7 +285,7 @@
         const bancoOrigen = $('#bancoOrigen').val();
         const bancoDestino = $('#bancoDestino').val();
         const numeroReferencia = $('#numeroReferencia').val();
-
+       
         let montoBs = cantidadPagada;
         let montoDollar = cantidadPagada / tasaCambio;
         // Validar cantidad pagada
@@ -280,9 +300,12 @@
             montoDollar = cantidadPagada;
         }
 
+        if (metodoPago === 'A credito') {
+            $('#btnSubmit').prop('disabled', false).removeClass('btn-danger').addClass('btn-primary');
 
-        let totalVenta = parseFloat($('#totalVenta').text().replace('$', ''));
-        let cancelado = parseFloat($('#cancelado').text().replace('$', ''));
+        }
+        let totalVenta = parseFloat($('#totalVenta').text().replace('Bs', ''));
+        let cancelado = parseFloat($('#cancelado').text().replace('Bs', ''));
 
         if (cancelado + montoBs > totalVenta) {
             $('#advertencia').show();
@@ -301,7 +324,7 @@
             };
 
             metodosPago.push(metodo);
-            $('#cancelado').text('$' + cancelado.toFixed(2));
+            $('#cancelado').text('Bs' + cancelado.toFixed(2));
 
             // Check if total is paid
             if (cancelado >= totalVenta) {
@@ -333,9 +356,20 @@
         let html = '';
         metodosPago.forEach((metodo, index) => {
             html += `
-            <div class="mb-2 metodoPagoItem mt-3" style='space-around'>
-                <span>${metodo.metodo} - $${metodo.monto_dollar.toFixed(2)} (${metodo.monto_bs.toFixed(2)} Bs) ${metodo.banco_origen ? ' | Origen: ' + metodo.banco_origen : ''} ${metodo.banco_destino ? ' | Destino: ' + metodo.banco_destino : ''} ${metodo.numero_referencia ? ' | Ref: ' + metodo.numero_referencia : ''}</span>
-                <button type="button" class="btn btn-danger btn-sm removeMetodoPago" data-index="${index}">Eliminar</button>
+           <div class="mb-2 metodoPagoItem mt-3 d-flex align-items-center justify-content-between">
+    <div class="d-flex flex-column">
+        <span class="fw-bold">${metodo.metodo} - $${metodo.monto_dollar.toFixed(2)} (${metodo.monto_bs.toFixed(2)} Bs)</span>
+        <small class="text-muted">
+            ${metodo.banco_origen ? 'Origen: ' + metodo.banco_origen : ''}
+            ${metodo.banco_destino ? ' | Destino: ' + metodo.banco_destino : ''}
+            ${metodo.numero_referencia ? ' | Ref: ' + metodo.numero_referencia : ''}
+        </small>
+    </div>
+    <button type="button" class="btn btn-danger btn-sm removeMetodoPago" data-index="${index}">
+        <i class="bi bi-trash3-fill"></i> Eliminar
+    </button>
+</div>
+
         `;
         });
         $('#metodosPagoList').html(html);
@@ -361,8 +395,8 @@
         });
 
         // Actualizar en el DOM
-        let totalVenta = parseFloat($('#totalVenta').text().replace('$', ''));
-        $('#cancelado').text('$' + totalCancelado.toFixed(2));
+        let totalVenta = parseFloat($('#totalVenta').text().replace('Bs', ''));
+        $('#cancelado').text('Bs' + totalCancelado.toFixed(2));
         $('#restante').text((totalCancelado - totalVenta).toFixed(2));
 
 

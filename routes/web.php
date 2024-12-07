@@ -87,12 +87,11 @@ Route::get('/producto/{id}', [VentaController::class, 'obtenerProducto'])->name(
 
 /* TASAS, MONEDAS E IMPUESTOS */
 Route::resource('tasas', App\Http\Controllers\TasasController::class);
-});
-
 /* COMPRAS */
 Route::get('/compras/export', [CompraController::class, 'export'])->name('compras.export');
 Route::get('/exportar-pagos', [PagoController::class, 'exportarPagos'])->name('exportar.pagos');
 Route::get('/exportar-cuentas-por-cobrar', [CuentaPorCobrarController::class, 'exportarCuentasPorCobrar'])->name('exportar.cuentas_por_cobrar');
+Route::get('/exportar-cuentas-por-pagar', [CuentaPorPagarController::class, 'exportarCuentasPorPagar'])->name('exportar.cuentas_por_pagar');
 
 Route::resource('compras', App\Http\Controllers\CompraController::class);
 Route::get('/comprar', [CompraController::class, 'comprar'])->name('compras.comprar');
@@ -110,6 +109,9 @@ Route::get('/pdfPago/{id}', [PdfController::class, 'pdfPago'])->name('pagos.pdf'
 /* PAGOS */
 Route::resource('usuarios', App\Http\Controllers\UserController::class);
 Route::get('/pdfUser/{id}', [PdfController::class, 'pdfEstadoCuenta'])->name('usuarios.pdf');
+});
+
+
 // Ruta de inicio de sesión
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/register', [LoginController::class, 'register'])->name('register');

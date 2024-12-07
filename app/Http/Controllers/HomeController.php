@@ -12,6 +12,7 @@ use App\Models\Proveedor;
 use App\Models\SubCategoria;
 use App\Models\User;
 use App\Models\Venta;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -33,16 +34,16 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $ventas = Venta::sum('monto_total');
-        $compras = Compra::sum('monto_total');
+        $ventas = Venta::whereDate('created_at', Carbon::today())->sum('monto_total');
+        $compras = Compra::whereDate('created_at', Carbon::today())->sum('monto_total');
         $usuarios = User::count();
         $productos = Producto::count();
         $categorias = Categoria::count();
         $subcategorias = SubCategoria::count();
         $proveedores = Proveedor::count();
         $pagos = Pago::count();
-        $deudas = CuentaPorPagar::count();
-        $creditos = CuentaPorCobrar::count();
+        $deudas = CuentaPorPagar::sum('monto');
+        $creditos = CuentaPorCobrar::sum('monto');
 
         $notificaciones = auth()->user()->unreadNotifications;
         function isConnected()

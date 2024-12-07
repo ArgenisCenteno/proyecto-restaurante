@@ -14,7 +14,7 @@
                             <h3 class="p-2 bold">Cuentas por cobrar</h3>
                         </div>
                         <div class="d-flex justify-content-end mt-3">
-                                <form action="{{ route('exportar.cuentas_por_cobrar') }}" method="GET">
+                                <form action="{{ route('exportar.cuentas_por_pagar') }}" method="GET">
                                     @csrf
                                     <div class="form-row">
                                         <div class="col-md-6">

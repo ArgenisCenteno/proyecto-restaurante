@@ -12,7 +12,7 @@
                 <th>Opciones</th>
             </tr>
         </thead>
-        <tbody></tbody>
+        <tbody class="text-center"></tbody>
     </table>
 
 
