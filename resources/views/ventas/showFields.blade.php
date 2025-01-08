@@ -21,8 +21,8 @@
                 <div class="col-md-4 mb-3">
                     <div class="form-group">
                         <label for="monto_total">Monto Total</label>
-                        <input type="text" class="form-control" id="monto_total" value="{{ number_format($venta->pago->monto_total, 2) }}" readonly>
                     </div>
+                    <input type="text" class="form-control" id="monto_total" value="{{ number_format($venta->pago->monto_total ?? $venta->monto_total, 2) }}" readonly>
                 </div>
             </div>
             <div class="row">
@@ -30,14 +30,14 @@
                 <div class="col-md-4 mb-3">
                     <div class="form-group">
                         <label for="monto_neto">Monto Neto</label>
-                        <input type="text" class="form-control" id="monto_neto" value="{{ number_format($venta->pago->monto_neto, 2) }}" readonly>
                     </div>
+                    <input type="text" class="form-control" id="monto_neto" value="{{ number_format($venta->pago->monto_neto ?? $venta->monto_neto, 2) }}" readonly>
                 </div>
                 <!-- Estado del Pago -->
                 <div class="col-md-4 mb-3">
                     <div class="form-group">
                         <label for="status_pago">Estado del Pago</label>
-                        <input value="{{ $venta->pago->status }}" readonly class="form-control" />
+                        <input value="{{ $venta->pago->status ?? 'NO PAGADO' }}" readonly class="form-control" />
                     </div>
                 </div>
                 <!-- Fecha de Venta -->
@@ -85,6 +85,7 @@
     </div>
 
     <!-- Pago -->
+     @if(isset($venta->pago))
     <div class="mb-4">
         <h5>Detalles del Pago</h5>
         <div class="table-responsive">
@@ -150,4 +151,5 @@
             </table>
         </div>
     </div>
+    @endif
 </div>

@@ -1,4 +1,4 @@
-<form action="{{ route('ventas.generarVenta') }}" method="POST">
+<form id="ventaForm" action="{{ route('ventas.generarVenta') }}" method="POST">
     @csrf <!-- Agrega el token CSRF para seguridad -->
     <section>
         <div class="row">
@@ -145,17 +145,38 @@
 
 
 
-
+ 
         <hr />
 
 
 
 
 
-        <button style="width: 100%" type="submit" id="submitBtn" class="btn btn-primary" disabled>Generar Venta</button>
+        <button style="width: 100%" type="button" id="submitBtn" class="btn btn-primary" disabled data-bs-toggle="modal" data-bs-target="#confirmModal">Generar Venta</button>
+
         </div>
 
     </section>
+<!-- Botón para abrir el modal -->
+
+<!-- Modal de confirmación -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-warning">
+        <h4 class="modal-title" id="confirmModalLabel">Confirmar venta</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="confirmProductoCarrito" class="productoCarrito"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="confirmVenta">Confirmar Venta</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 </form>
 

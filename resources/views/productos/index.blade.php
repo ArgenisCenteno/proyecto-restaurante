@@ -11,7 +11,7 @@
                             @include('flash::message')
                         </div>
                         <div class="col-md-6 col-6">
-                            <h3 class="p-2 bold">Productos</h3>
+                            <h4 class="p-2 bold">Productos</h4>
                         </div>
                         <div class="d-flex justify-content-end mt-3">
                                 <a href="{{route('productos.create')}}" class="btn btn-primary  round mx-1" >Registrar</a>

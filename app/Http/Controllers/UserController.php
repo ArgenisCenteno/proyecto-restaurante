@@ -33,10 +33,8 @@ class UserController extends Controller
                 ->addColumn('actions', function ($row) {
                     $viewUrl = route('usuarios.edit', $row->id);
                     $deleteUrl = route('usuarios.destroy', $row->id);
-                    $pdfUrl = route('usuarios.pdf', $row->id);
-                    return '<a href="' . $viewUrl . '" class="btn btn-info btn-sm">Ver</a>
-                            <a href="' . $pdfUrl . '" class="btn btn-warning btn-sm" target="_blank">PDF</a>
-                            <form action="' . $deleteUrl . '" method="POST" style="display:inline;" class="btn-delete">
+                     return '<a href="' . $viewUrl . '" class="btn btn-success btn-sm">Editar</a>
+                             <form action="' . $deleteUrl . '" method="POST" style="display:inline;" class="btn-delete">
                                 ' . csrf_field() . '
                                 ' . method_field('DELETE') . '
                                 <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>

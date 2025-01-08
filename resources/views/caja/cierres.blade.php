@@ -11,7 +11,7 @@
                                 @include('flash::message')
                             </div>
                             <div class="col-md-6 col-6">
-                                <h3 class="p-2 bold">Cierres</h3>
+                                <h4 class="p-2 bold">Cierres</h4>
                             </div>
                             <div class="col-md-6 col-6 text-right">
                                 <!-- Buscador -->

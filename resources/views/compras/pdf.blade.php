@@ -5,155 +5,163 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Cúmana Grill</title>
-    <link rel="stylesheet" href="{{ public_path('css/pdf.css') }}">
+    <title>Ortimed</title>
+
     <link rel="stylesheet" href="{{ public_path('css/bootstrap.min.css') }}"
         integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
 
+    <style>
+
+    </style>
 </head>
 
-<body>
+<body
+    style="font-family: Arial, sans-serif; margin: 0; padding: 10px; line-height: 1.6; border: none; background-color: #f9f9f9;">
+    <div
+        style="max-width: 800px; margin: auto; padding: 10px; border-radius: 8px; background: #fff; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+        <!-- Encabezado -->
+        <div
+            style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 10px; border-bottom: 2px solid #ddd;">
+            <div style="width: 20%; flex: 1;">
+            </div>
+            <div style="text-align: center; flex: 1;">
 
-    <header class="row">
-        <div class="header-left">
-        <img src="{{ public_path('iconos/logo.jpg') }}" width="100px" alt="" style="margin-left: 20px">
-
-        </div>
-        <div class="header-center text-center">
-            <strong>
-                <p style="margin-top: 0; margin-bottom:0; font-size:0.7rem;">REPÚBLICA BOLÍVARIANA DE VENEZUELA</p>
-                <p style="margin-top: 0; margin-bottom:0; font-size:0.7rem;">ESTADO MONAGAS</p>
-                <p style="margin-top: 0; margin-bottom:0; font-size:0.7rem;">ALCALDÍA BOLÍVARIANA DEL MUNICIPIO MATURÍN
-                </p>
-            </strong>
-        </div>
-        <div class="header-right " >
-            <h3>Cúmana Grill</h3>
-        </div>
-    </header>
-
-    <div class="fondo-titulo text-center container-fluid ">
-        <h1><strong>COMPROBANTE DE COMPRA</strong></h1>
-    </div>
-
-    <div style="clear: both;"></div>
-
-    <div class="container content-doc mt-2">
-        <div class="col-6 d-inline-flex">
-            <p class="mb-0 mt-1 " style="font-size: 12px;"><strong>NOMBRE O RAZÓN SOCIAL</strong></p>
-            <p class="razon-social mb-0 p-1 pl-3 " style="font-size: 12px; padding-left: 10px;">
-                {{ strtoupper($compra->proveedor->razon_social) }}
-            </p>
-        </div>
-
-       
-
-
-        <div class="col-6 d-inline-flex mt-0">
-            <p style="font-size: 12px;" class="mb-1 mt-0"><strong>RIF:</strong> {{   $compra->proveedor->rif}}
-            </p>
-        </div>
-
-        <div class="col-4 d-inline-flex">
-            <p style="font-size: 12px;" class="mb-0"><strong>FECHA DE COMPRA:</strong> </p>
-            <p style="font-size: 12px;" >{{ $compra->created_at }}</p>
-        </div>
-
-      
-
-      
-
-        <div class="col-6 d-inline-flex">
-            <p style="font-size: 12px;" class="mb-0"><strong>DIRECCIÓN:</strong></p>
-            <p style="font-size: 12px;"> {{ $userArray['sector'] ?? 'Sector no disponible' }},
-                                {{ $userArray['calle'] ?? 'Calle no disponible' }},
-                                {{ $userArray['casa'] ?? 'Casa no disponible' }} </p>
-        </div>
- 
-
-
-        <div class="col-6 d-inline-flex mb-0 mt-0 ">
-            <p style="font-size: 12px;" class="mt-0 razon-social p-1 pl-3">COMPRA NRO
-            @php
-                                $id = str_pad($compra->id, 6, "0", STR_PAD_LEFT);
-                            @endphp
-                @if ($id)
-                    <strong>{{ $id }}</strong>
-
-                @endif
-            </p>
-
-
+                <h1 style="margin: 0;  color: #333;"></h1>
+            </div>
 
         </div>
-
-        <div class="col-4 d-inline-flex">
-            <p style="font-size: 12px;" class="mb-0"></p>
-            <p style="font-size: 12px;">
-
-            </p>
-        </div>
-    </div>
-
-    <div class="container">
-        <table class="table" style="font-size: 12px">
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
             <thead>
                 <tr>
-                    <th class="text-center" scope="col">PRODUCTO</th>
-                    <th class="text-center" scope="col">PRECIO</th>
-                    <th class="text-center" scope="col">Cantidad</th>
-                    <th class="text-center" scope="col">NETO</th>
-                    <th class="text-center" scope="col">IMPUESTOS</th>
-                    <th class="text-center" scope="col">SUBTOTAL</th>
+                    <th
+                        style="border-bottom: 2px solid #ddd; padding: 8px; text-align: center; font-size: 18px; width: 15%;">
+                        <img src="{{ public_path('iconos/logo.jpg') }}" alt="Logo"
+                            style="max-width: 100px; height: auto;">
+                    </th>
+                    <th colspan="2"
+                        style="border-bottom: 2px solid #ddd; padding: 8px; text-align: center; font-size: 22px; font-weight: bold; width: 70%;">
+                        CUMANA GRILL C.A
+                    </th>
+                    @php
+                        $id = str_pad($compra->id, 8, "0", STR_PAD_LEFT);
+                    @endphp
+                    <th
+                        style="border-bottom: 2px solid #ddd; padding: 8px; text-align: center; font-size: 22px; width: 15%;">
+                        {{$id}}
+                    </th>
+                </tr>
+            </thead>
+        </table>
+
+
+        <!-- Título -->
+        <h3 style="text-align: center; color: #333; font-size: 24px; margin: 20px 0;">COMPROBANTE DE COMPRA</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+            <thead>
+                <tr>
+                    <th style="padding: 8px; text-align: left;">DIRECCIÓN</th>
+                    <th style="padding: 8px; text-align: left;">CIUDAD.</th>
+                    <th style="padding: 8px; text-align: left;">FECHA DE COMPRA.</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                <tr>
+                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">CALLE AYACUCHO FRENTE AL CEMENTERIO DE
+                        PUNTA DE MATA</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">MONAGAS</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">{{$fechacompra}}</td>
+                </tr>
+            </tbody>
+        </table>
+        <!-- Detalles del cliente y vendedor -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+            <thead>
+                <tr>
+                    <th style="padding: 8px; text-align: left;">PROVEEDOR</th>
+                    <th style="padding: 8px; text-align: left;">VENDEDOR.</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                <tr>
+                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">{{$compra->proveedor->razon_social}}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">{{$vendedorArray['name']}}</td>
+
+
+                </tr>
+            </tbody>
+        </table>
+
+
+        <!-- Tabla de productos -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+            <thead>
+                <tr>
+                    <th style="padding: 8px; text-align: left;">PRODUCTO</th>
+                    <th style="padding: 8px; text-align: left;">CANT.</th>
+                    <th style="padding: 8px; text-align: left;">PRECIO UNIT.</th>
+                    <th style="padding: 8px; text-align: left;">IVA</th>
+                    <th style="padding: 8px; text-align: left;">NETO</th>
+                    <th style="padding: 8px; text-align: left;">TOTAL</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($compra->detalleCompras as $detalle)
-                    <tr class="border text-center">
-                        <td class="m-0 p-0 align-center">
-                            <p class="mb-0">{{ $detalle->producto->nombre ?? 'Producto no disponible' }}</p>
-                            <!-- Asegúrate de que 'nombre' es el campo correcto -->
-                        </td>
-
-                        <td class="m-0 p-0 align-center">
-                            <p class="mb-0">{{ number_format($detalle->precio_producto, 2) }} </p>
-                        </td>
-
-                        <td class="m-0 p-0 align-center">
-                            <p class="mb-0">{{ number_format($detalle->cantidad, 2) }} </p>
-                        </td>
-
-                        <td class="m-0 p-0 align-center">
-                            <p class="mb-0">{{ number_format($detalle->neto, 2) }}</p>
-                        </td>
-
-                        <td class="m-0 p-0 align-center">
-                            <p class="mb-0">{{ number_format($detalle->impuesto, 2) }}</p>
-                        </td>
-
-                        <td class="m-0 p-0 align-center">
-                            <p class="mb-0">{{ number_format($detalle->neto + $detalle->impuesto, 2) }}</p>
+                    <tr>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">{{$detalle->producto->nombre}}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">{{$detalle->cantidad}}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">{{$detalle->precio_producto}}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">{{$detalle->impuesto}}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">{{$detalle->neto}}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">
+                            {{number_format($detalle->impuesto + $detalle->neto, 2)}}
                         </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
-    </div>
+
+        <!-- Resumen de totales -->
+        <div style="display: flex; justify-content: space-between; margin-top: 20px; align-items: flex-start;">
+            <!-- Contenedor del QR -->
 
 
-    <div class="container content-firma" style="margin-top: 9rem; position: relative;">
-        <div class="firma-center">
-            <div style="border-top: 2px solid black;"></div>
-            <p><strong>EMPLEADO</strong></p>
-            <p style="margin: 0; font-size: 0.9rem;">{{$vendedorArray['name']}}</p>
+            <!-- Contenedor de los montos -->
+            <div
+                style="text-align: right; padding: 10px; border: 2px solid #ddd; border-radius: 8px; background-color: #f9f9f9; flex-grow: 1;">
+                <div style="text-align: left; margin-right: 20px;">
+                </div>
+                <p style="margin: 0; padding: 5px; border-bottom: 1px solid #ddd;"><strong>SUBTOTAL:</strong>
+                    {{$compra->pago->monto_neto}}</p>
+                <p style="margin: 0; padding: 5px; border-bottom: 1px solid #ddd;"><strong>IVA (16%):</strong>
+                    {{$compra->pago->impuestos}}</p>
+                <p style="margin: 0; padding: 5px;"><strong>MONTO TOTAL:</strong> {{$compra->pago->monto_total}}</p>
+            </div>
         </div>
-        
-    </div>
-    {{-- <div style="clear: both;"></div> --}}
 
-    
-    {{-- SALTO DE PAGINA --}}
-    
+
+
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; margin-top: 60px">
+   
+    <tbody>
+        <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;"></td>
+            <td style="padding: 8px; text-align: center;">__________________________________</td>
+            <td style="padding: 8px; text-align: center;">__________________________________</td>
+            <td style="padding: 8px; border-bottom: 1px solid #ddd;"></td>
+        </tr>
+        <tr>
+            <td style="padding: 8px; text-align: left;"></td>
+            <td style="padding: 8px; text-align: center;">Firma del Proveedor</td>
+            <td style="padding: 8px; text-align: center;">Firma del Vendedor</td>
+            <td style="padding: 8px; text-align: left;"></td>
+        </tr>
+    </tbody>
+</table>
+
 
 </body>
 

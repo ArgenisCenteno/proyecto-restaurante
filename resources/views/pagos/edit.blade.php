@@ -11,7 +11,7 @@
                             @include('flash::message')
                         </div>
                         <div class="col-md-6 col-6">
-                            <h3 class="p-2 bold">Editar Pago</h3>
+                            <h4 class="p-2 bold">Editar Pago</h4>
                         </div>
                        
                     </div>

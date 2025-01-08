@@ -43,14 +43,15 @@
               <li><a href="{{ route('compras.index') }}">Historial</a></li>
             </ul>
           </li>
+          @if(Auth::user()->hasRole('superAdmin'))
           <li class="dropdown">
-            <a href="#"><span>Ventas</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <a href="#"><span>Almacen</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>
             <li><a href="{{ route('almacen') }}">Productos</a></li>
             <li><a href="{{ route('productos.create') }}">Nuevo Producto</a></li>
             </ul>
           </li>
-         
+          @endif
          
           <li class="dropdown">
             <a href="#"><span>Transacciones</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
@@ -62,14 +63,18 @@
               <li><a href="{{ route('proveedores.index') }}">Proveedores</a></li>
             </ul>
           </li>
+          @if(Auth::user()->hasRole('superAdmin'))
           <li class="dropdown">
-            <a href="#"><span>Caja</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <a href="#"><span>Administración</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>
               <li><a href="{{ route('cajas.index') }}">Cajas</a></li>
               <li><a href="{{ route('caja.aperturas') }}">Aperturas</a></li>
               <li><a href="{{ route('caja.cierres') }}">Cierres</a></li>
+              <li><a href="{{ route('usuarios.index') }}">Usuarios</a></li>
+
             </ul>
           </li>
+          @endif
           <li class="dropdown user-menu">
             <a href="#"><span>{{ Auth::user()->name }}</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>

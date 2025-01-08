@@ -25,7 +25,7 @@
 </div>
 <div class="productoCarrito" id="productoCarrito" class="mt-3">
 
-        </div>
+</div>
 
 @section('js')
 @include('layout.script')
@@ -439,6 +439,43 @@
         alert('Formulario enviado correctamente.');
         // this.submit(); // Descomenta esta línea para enviar el formulario realmente
     });
+
+
+
+    document.getElementById("submitBtn").addEventListener("click", function () {
+  const carrito = document.getElementById("productoCarrito"); // Elemento del carrito original
+  const confirmCarrito = document.getElementById("confirmProductoCarrito"); // Contenedor del modal
+
+  // Limpia el contenido previo del modal
+  confirmCarrito.innerHTML = "";
+
+  // Clona los productos del carrito y los agrega al modal
+  const productos = carrito.querySelectorAll(".productoCarrito");
+  productos.forEach((producto) => {
+    const productoClone = producto.cloneNode(true);
+
+    // Deshabilitar entradas y botones de edición en el modal
+    const inputs = productoClone.querySelectorAll("input");
+    inputs.forEach((input) => input.setAttribute("disabled", true));
+
+    const removeButton = productoClone.querySelector(".removeProducto");
+    if (removeButton) {
+      removeButton.remove(); // Eliminar botones de eliminación
+    }
+
+    confirmCarrito.appendChild(productoClone); // Agregar producto clonado al modal
+  });
+});
+
+document.getElementById("confirmVenta").addEventListener("click", function () {
+  // Obtén el formulario
+  const form = document.getElementById("ventaForm");
+
+  // Envía el formulario
+  form.submit();
+});
+
+
 </script>
 
 @endsection

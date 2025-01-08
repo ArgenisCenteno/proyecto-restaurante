@@ -11,7 +11,7 @@
                             @include('flash::message')
                         </div>
                         <div class="col-md-6 col-6">
-                            <h3 class="p-2 bold">Cuentas por pagar</h3>
+                            <h4 class="p-2 bold">Cuentas por pagar</h4>
                         </div>
                         <div class="d-flex justify-content-end mt-3">
                                 <form action="{{ route('exportar.cuentas_por_pagar') }}" method="GET">

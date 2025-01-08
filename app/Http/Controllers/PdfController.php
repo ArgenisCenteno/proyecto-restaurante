@@ -22,6 +22,10 @@ class PdfController extends Controller
         }
         // Ocultar 'password' y 'remember_token' y convertir a array
         $vendedorArray = $venta->vendedor->makeHidden(['password', 'remember_token'])->toArray();
+       if(!$venta->pago_id) {
+        Alert::error('¡No esta pagado!', 'Esta venta no ha sido pagada, se debe pagar para generar el comprobante de venta.')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
+        return redirect(route('ventas.index'));
+       }
         $userArray = $venta->user->makeHidden(['password', 'remember_token'])->toArray();
         $fechaVenta = $venta->created_at->format('d-m-Y');
         $formaPagoArray = json_decode($venta->pago->forma_pago, true); 
