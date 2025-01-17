@@ -164,10 +164,12 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header bg-warning">
-        <h4 class="modal-title" id="confirmModalLabel">Confirmar venta</h4>
+        <h2 class="modal-title" id="confirmModalLabel">Confirmar venta</h2>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
+        <h3 class="text-black" id="totalModal"></h3>
+        <h3 class="text-success" id="totalModalBs"></h3>
         <div id="confirmProductoCarrito" class="productoCarrito"></div>
       </div>
       <div class="modal-footer">

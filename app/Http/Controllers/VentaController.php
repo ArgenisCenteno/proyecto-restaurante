@@ -181,7 +181,7 @@ class VentaController extends Controller
     public function obtenerProducto(Request $request, $id)
     {
         if ($request->ajax()) {
-            $producto = Producto::with('subCategoria')->find($id);
+            $producto = Producto::with('subCategoria', 'imagenes')->find($id);
 
 
             if (!$producto) {

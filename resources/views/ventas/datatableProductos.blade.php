@@ -23,6 +23,13 @@
         </tbody>
     </table>
 </div>
+<div class="text-center mt-4 card pt-2 pb-2 bg-warning text-black"
+    style="box-shadow: rgba(133, 152, 11, 0.2) 0px 7px 29px 0px;">
+    <h3>Carrito de Compras</h3>
+
+
+
+</div>
 <div class="productoCarrito" id="productoCarrito" class="mt-3">
 
 </div>
@@ -113,15 +120,20 @@
                             return;
                         }
                         let dolar = $("#tasa").val();
+                     
                         const productName = producto.nombre;
-                        const productPrice = producto.precio_venta * dolar;
-                        const productIva = producto.aplica_iva ? 'Sí' : 'No';
-                        var precioProductoIva = producto.precio_venta * dolar;
-                        if (productIva == 'Sí') {
-                            var precioProductoIva = productPrice * 1.16;
-                        } else {
-                            var precioProductoIva = productPrice;
-                        }
+                        const productoUrl = producto.imagenes[0].url;
+                        
+                        const productPrice = (producto.precio_venta * dolar).toFixed(2); // Format to 2 decimal places
+const productIva = producto.aplica_iva ? 'Sí' : 'No';
+
+let precioProductoIva;
+if (productIva === 'Sí') {
+    precioProductoIva = (productPrice * 1.16).toFixed(2); // Apply IVA and format
+} else {
+    precioProductoIva = parseFloat(productPrice).toFixed(2); // Ensure consistent format
+}
+
                         const productDescription = producto.descripcion;
                         const productLote = producto.lote;
                         const productoStock = producto.cantidad;
@@ -133,27 +145,41 @@
                             nombre: productName,
                             precio: productPrice,
                             aplicaIva: producto.aplica_iva,
-                            cantidad: 1 // Cantidad inicial
+                            cantidad: 1, // Cantidad inicial,
+                            productoUrl: productoUrl // Cantidad inicial
                         });
                         const productoHTML = `
 <div class="productoCarrito p-2 border rounded bg-light mb-2" id="productoCarrito_${productId}">
-    <div class="d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Bs ${precioProductoIva}</h5>
-        <span class="aplicaIVA text-primary d-none" id="aplicaIVA_${productId}">${productIva}</span>
-    </div>
-    <h6 class="mt-1 nombreProducto">${productName}</h6>
-    <small class="text-muted">Precio bruto: <span class="fw-bold text-success" id="precioProducto_${productId}">Bs ${productPrice}</span></small>
-     
-    <div class="d-flex align-items-center mt-2">
-        <div class="input-group me-2">
-            <span class="input-group-text">Cant:</span>
-            <input type="number" class="form-control cantidadProducto" value="1" min="1" id="cantidadProducto_${productId}">
-            <input type="hidden" class="stock" id="stock_${productId}" value="${productoStock}"/>
+    <div class="d-flex">
+        <!-- Imagen del producto -->
+        <div class="me-3">
+            ${productoUrl ? `<img src="${productoUrl}" alt="Imagen del producto" style="width: 100px; height: auto;">` : '<span>Sin imagen</span>'}
         </div>
-        <button type="button" class="btn btn-outline-danger btn-sm removeProducto" id="removeProducto_${productId}">Eliminar</button>
+
+        <!-- Información del producto -->
+        <div class="flex-grow-1">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Bs ${precioProductoIva}</h5>
+                <span class="aplicaIVA text-primary d-none" id="aplicaIVA_${productId}">${productIva}</span>
+            </div>
+            <h6 class="mt-1 nombreProducto">${productName}</h6>
+            <small class="text-muted">Precio bruto: <span class="fw-bold text-success" id="precioProducto_${productId}">Bs ${productPrice}</span></small>
+            
+            <!-- Campo de cantidad debajo -->
+            <div class="d-flex align-items-center mt-2">
+                <div class="input-group me-2">
+                    <span class="input-group-text">Cant:</span>
+                    <input type="number" class="form-control cantidadProducto" value="1" min="1" id="cantidadProducto_${productId}">
+                    <input type="hidden" class="stock" id="stock_${productId}" value="${productoStock}"/>
+                </div>
+                <button type="button" class="btn btn-outline-danger btn-sm removeProducto" id="removeProducto_${productId}">Eliminar</button>
+            </div>
+        </div>
     </div>
 </div>
 `;
+
+
 
 
                         // Agregar el productoHTML al contenedor #productoCarrito
@@ -444,6 +470,22 @@
 
     document.getElementById("submitBtn").addEventListener("click", function () {
   const carrito = document.getElementById("productoCarrito"); // Elemento del carrito original
+  const totalModal = document.getElementById("totalModal"); // Elemento del carrito original
+  const totalVenta = document.getElementById("totalVenta"); // Elemento del carrito original
+  const totalVentaBS = document.getElementById("totalVentaBs"); // Elemento del carrito original
+  const totalModalBs = document.getElementById("totalModalBs"); // Elemento del carrito original
+
+  const valorTotalVenta = totalVenta ? totalVenta.innerText : '0'; // Si no existe, asigna '0'
+const valorTotalVentaBS = totalVentaBS ? totalVentaBS.innerText : '0'; // Si no existe, asigna '0';
+
+// Asignar los valores a totalModal y totalModalBs
+if (totalModal) {
+    totalModal.innerText = valorTotalVenta; // Asigna el texto de totalVenta a totalModal
+}
+
+if (totalModalBs) {
+    totalModalBs.innerText = valorTotalVentaBS; // Asigna el texto de totalVentaBS a totalModalBs
+}
   const confirmCarrito = document.getElementById("confirmProductoCarrito"); // Contenedor del modal
 
   // Limpia el contenido previo del modal
