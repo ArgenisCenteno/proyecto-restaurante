@@ -227,6 +227,7 @@ class CompraController extends Controller
         $Compra->user_id = $userId;
         $Compra->proveedor_id = $request->user_id;
         $Compra->monto_total = $montoTotal;
+        $Compra->tipo = 'Crédito';
         $Compra->status = $estatus;
         $Compra->save();
 

@@ -1,7 +1,7 @@
-<div class="container">
+<div class="">
     <!-- Información de la Venta -->
     <form>
-        <div class="container">
+        <div class="">
             <div class="row">
                 <!-- Vendedor -->
                 <div class="col-md-4 mb-3">
@@ -85,7 +85,7 @@
     </div>
 
     <!-- Pago -->
-     @if(isset($venta->pago))
+     @if(isset($venta->pago) && $venta->tipo == 'Regular')
     <div class="mb-4">
         <h5>Detalles del Pago</h5>
         <div class="table-responsive">

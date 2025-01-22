@@ -7,6 +7,7 @@ use App\Models\Caja;
 use App\Models\CuentaPorCobrar;
 use App\Models\Movimiento;
 use App\Models\Pago;
+use App\Models\PagosCuentasPorCobrar;
 use App\Models\Recibo;
 use App\Models\Transaccion;
 use App\Models\Venta;
@@ -109,104 +110,136 @@ class CuentaPorCobrarController extends Controller
     {
         $cuenta = CuentaPorCobrar::findOrFail($id);
         $cajas = Caja::all();
-        return view('cuentas-por-cobrar.show', compact('cuenta', 'cajas'));
+        $pagos = PagosCuentasPorCobrar::where('cuenta_por_cobrar_id', $id)->get();
+       
+        return view('cuentas-por-cobrar.show', compact('cuenta', 'pagos', 'cajas'));
     }
 
     // Método para actualizar una cuenta por cobrar
     public function update(Request $request, $id)
     {
         $cuenta = CuentaPorCobrar::findOrFail($id);
+    
         if (!$request->caja) {
             Alert::error('¡Error!', 'Debe seleccionar una caja')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
             return redirect()->back();
         }
+    
         $caja = Caja::find($request->caja);
         $apertura = AperturaCaja::where('caja_id', $caja->id)->where('estado', 'Operando')->first();
+    
         if (!$apertura) {
             Alert::error('¡Error!', 'La caja seleccionada no está abierta')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
             return redirect()->back();
         }
-        if($cuenta->pago_id != null){
-            Alert::error('¡Error!', 'Esta cuenta ya fue pagada')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
-
+    
+        if ($cuenta->estado === 'Pagado') {
+            Alert::error('¡Error!', 'Esta cuenta ya fue pagada en su totalidad')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
             return redirect()->back();
         }
+    
+       // dd($request);
+        // Determinar el monto a pagar
+        $montoPago = $request->filled('otro_monto') ? $request->otro_monto : $request->monto_pago;
+        $saldoRestante = $cuenta->monto - $cuenta->monto_pagado;
+        $montoPago = floatval($montoPago);  // Convertir a float si es string
+        $saldoRestante = floatval($saldoRestante);  // Convertir a float si es string
+        
 
+     /*   if ($montoPago > $saldoRestante) {
+            Alert::error('¡Error!', 'El monto ingresado supera el saldo restante')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
+            return redirect()->back();
+        }*/
+
+        $metodo = [
+           [ "metodo" => $request->tipo_pago,
+            "cantidad" => $montoPago,
+            "banco_origen" => $request->banco_origen,
+            "banco_destino" => $request->banco_destino,
+            "numero_referencia" => $request->referencia,
+            "monto_bs" => $montoPago,
+            "monto_dollar" => 0,]
+        ];
+    
+        // Registrar el pago
         $pago = new Pago();
         $pago->tipo = 'Venta';
         $pago->status = 'Pagado';
-        $pago->monto_total = $request->monto_pago;
-        $pago->monto_neto = $request->monto_pago;
-        $pago->forma_pago = $request->tipo_pago;
+        $pago->monto_total = $montoPago;
+        $pago->monto_neto = $montoPago;
+        $pago->forma_pago = json_encode($metodo);
         $pago->creado_id = Auth::user()->id;
-        $cuenta->estado = 'Pagado';
         $pago->fecha_pago = Carbon::now();
         $pago->save();
-
-        $cuenta->estado = 'Pagado';
+    
+        // Registrar en PagosCuentasPorCobrar
+        $pagosCuentasPorCobrar = new PagosCuentasPorCobrar();
+        $pagosCuentasPorCobrar->pago_id = $pago->id;
+        $pagosCuentasPorCobrar->cuenta_por_cobrar_id = $cuenta->id;
+        $pagosCuentasPorCobrar->monto_abono = $montoPago;
+         
+        $pagosCuentasPorCobrar->save();
+    
+        // Actualizar la cuenta por cobrar
+        $cuenta->monto_pagado += $montoPago;
+        $cuenta->estado = $cuenta->monto_pagado >= $cuenta->monto ? 'Pagado' : 'Parcialmente Pagado';
         $cuenta->pago_id = $pago->id;
         $cuenta->save();
-
+    
+        // Crear el recibo
         $recibo = new Recibo();
         $recibo->tipo = 'Venta';
-        $recibo->monto = $request->monto_pago;
+        $recibo->monto = $montoPago;
         $recibo->estatus = $pago->status;
         $recibo->pago_id = $pago->id;
         $recibo->user_id = $request->user_id;
         $recibo->activo = 1;
         $recibo->creado_id = Auth::user()->id;
-        $recibo->descuento = $request->descuento;
+        $recibo->descuento = $request->descuento ?? 0;
         $recibo->save();
-
-        //caja
-       
+    
+        // Registrar el movimiento en la caja
         $movimiento = new Movimiento();
-
-        $movimiento->caja_id = $caja->id; 
-        $movimiento->usuario_id = Auth::user()->id; 
-        $movimiento->tipo = 'entrada'; 
-        $movimiento->descripcion = "Registro de venta"; 
-        $movimiento->fecha = now(); 
+        $movimiento->caja_id = $caja->id;
+        $movimiento->usuario_id = Auth::user()->id;
+        $movimiento->tipo = 'entrada';
+        $movimiento->descripcion = "Pago parcial de venta";
+        $movimiento->fecha = now();
         $movimiento->apertura_id = $apertura->id;
-
-
-        
-        // Verificar la forma de pago y asignar el monto correspondiente
+    
         if ($request->forma_pago === 'Divisa') {
-            $movimiento->monto_dolares =  $request->monto_pago; // Asignar el monto total en dólares
-            $movimiento->monto_bolivares = 0; // Asegúrate de que el campo en bolívares esté vacío
+            $movimiento->monto_dolares = $montoPago;
+            $movimiento->monto_bolivares = 0;
         } else {
-            $movimiento->monto_bolivares = $request->monto_pago; // Asignar el monto total en bolívares
-            $movimiento->monto_dolares = 0; // Asegúrate de que el campo en dólares esté vacío
+            $movimiento->monto_bolivares = $montoPago;
+            $movimiento->monto_dolares = 0;
         }
-        
-        // Guardar el movimiento en la base de datos
+    
         $movimiento->save();
-
-        //Transaccion
-
+    
+        // Registrar la transacción
         $transaccion = new Transaccion();
         $transaccion->caja_id = $caja->id;
         $transaccion->usuario_id = Auth::user()->id;
-        $transaccion->monto_total_bolivares =  $request->monto_pago;
-        $transaccion->monto_total_dolares =  0;
-        $transaccion->metodo_pago =  $request->tipo_pago;
-        $transaccion->moneda =  'Bolivar';
-        $transaccion->fecha =  Carbon::now();
+        $transaccion->monto_total_bolivares = $montoPago;
+        $transaccion->monto_total_dolares = 0;
+        $transaccion->metodo_pago = $request->tipo_pago;
+        $transaccion->moneda = 'Bolivar';
+        $transaccion->fecha = Carbon::now();
         $transaccion->apertura_id = $apertura->id;
-
         $transaccion->save();
-
+    
+        // Actualizar el estado de la venta si se completó el pago
         $venta = Venta::find($cuenta->venta_id);
-        $venta->status = 'Pagado';
+        $venta->status = ($cuenta->estado === 'Pagado') ? 'Pagado' : 'Parcialmente Pagado';
         $venta->pago_id = $pago->id;
         $venta->save();
-
-        Alert::success('¡Exito!', 'Cuenta por cobrar actualizada correctamente')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
-
+    
+        Alert::success('¡Éxito!', 'Pago registrado correctamente')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
         return redirect()->route('cuentas-por-cobrar.index');
-
     }
+    
+    
 
     // Método para eliminar una cuenta por cobrar
     public function destroy($id)

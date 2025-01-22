@@ -78,14 +78,16 @@
           <li class="dropdown user-menu">
             <a href="#"><span>{{ Auth::user()->name }}</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>
-              <li>
-                <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                  Salir
-                </a>
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                  @csrf
-                </form>
-              </li>
+            <li>
+    <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+        Salir
+    </a>
+    <!-- Formulario para realizar el POST de logout -->
+    <form id="logout-form" action="{{ route('verificarCaja') }}" method="POST" class="d-none">
+        @csrf
+    </form>
+</li>
+
             </ul>
           </li>
         </ul>

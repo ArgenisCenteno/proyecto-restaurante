@@ -15,11 +15,18 @@ class PdfController extends Controller
     public function pdfVenta(Request $request, $id)
     {
         $venta = Venta::with('detalleVentas', 'vendedor', 'user', 'pago')->where('id', $id)->first();
-
+        $subtotal = 0;
+        $iva = 0;
         if (!$venta) {
             Alert::error('¡Error!', 'Venta no encontrada.')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
             return redirect(route('ventas.index'));
         }
+
+        if(!$venta->pago && $venta->tipo != 'Regular'){
+            Alert::error('¡No esta pagado!', 'Esta compra no ha sido pagada, se debe pagar para generar el comprobante de compra.')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
+            return redirect(route('compras.index'));
+        }
+        
         // Ocultar 'password' y 'remember_token' y convertir a array
         $vendedorArray = $venta->vendedor->makeHidden(['password', 'remember_token'])->toArray();
        if(!$venta->pago_id) {
@@ -30,7 +37,7 @@ class PdfController extends Controller
         $fechaVenta = $venta->created_at->format('d-m-Y');
         $formaPagoArray = json_decode($venta->pago->forma_pago, true); 
 
-
+       
        // dd($vendedorArray);
         $pdf = \App::make('dompdf.wrapper');
         $pdf->loadView('ventas.pdf', compact('venta', 'formaPagoArray', 'vendedorArray', 'userArray', 'fechaVenta'));
@@ -44,6 +51,11 @@ class PdfController extends Controller
         if (!$compra) {
             Alert::error('¡Error!', 'Venta no encontrada.')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
             return redirect(route('ventas.index'));
+        }
+
+        if(!$compra->pago && $compra->tipo != 'Regular'){
+            Alert::error('¡No esta pagado!', 'Esta compra no ha sido pagada, se debe pagar para generar el comprobante de compra.')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
+            return redirect(route('compras.index'));
         }
         // Ocultar 'password' y 'remember_token' y convertir a array
         $vendedorArray = $compra->user->makeHidden(['password', 'remember_token'])->toArray();

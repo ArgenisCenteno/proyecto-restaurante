@@ -61,44 +61,56 @@ class CuentaPorPagarController extends Controller
     // Actualizar una cuenta por pagar
     public function update(Request $request, $id)
     {
-       
-
+        // Obtener la cuenta por pagar
         $cuenta = CuentaPorPagar::findOrFail($id);
+        
+        // Validar que el monto del pago no sea mayor que el saldo pendiente
+        $saldoRestante = $cuenta->monto - $cuenta->monto_pagado;
+        $montoPago = $request->monto_pago;
+    
+    
+        // Crear un nuevo registro de pago
         $pago = new Pago();
         $pago->tipo = 'Compra';
-        $pago->status = 'Pagado';
-        $pago->monto_total = $request->monto_pago;
-        $pago->monto_neto = $request->monto_pago;
-        $pago->forma_pago = $request->tipo_pago;
+        $pago->status = 'Pagado'; // Puedes modificar esto según el estado de pago
+        $pago->monto_total = $montoPago;
+        $pago->monto_neto = $montoPago;
+        $pago->forma_pago = $request->tipo_pago; // Suponiendo que es un JSON o un string
         $pago->creado_id = Auth::user()->id;
-        $cuenta->estado = 'Pagado';
         $pago->fecha_pago = Carbon::now();
         $pago->save();
-
-        $cuenta->estado = 'Pagado';
+    
+        // Actualizar el estado de la cuenta por pagar
+        $cuenta->estado = $cuenta->monto_pagado + $montoPago >= $cuenta->monto ? 'Pagado' : 'Parcial';
         $cuenta->pago_id = $pago->id;
+        $cuenta->monto_pagado += $montoPago; // Agregar el monto pagado
         $cuenta->save();
-
+    
+        // Crear un recibo para este pago
         $recibo = new Recibo();
         $recibo->tipo = 'Compra';
-        $recibo->monto = $request->monto_pago;
+        $recibo->monto = $montoPago;
         $recibo->estatus = $pago->status;
         $recibo->pago_id = $pago->id;
         $recibo->user_id = $request->user_id;
         $recibo->activo = 1;
         $recibo->creado_id = Auth::user()->id;
-        $recibo->descuento = $request->descuento;
+        $recibo->descuento = $request->descuento ?? 0; // Descuento puede ser opcional
         $recibo->save();
-
+    
+        // Si la compra está completamente pagada, cambiar su estado a "Pagado"
         $compra = Compra::find($cuenta->compra_id);
+        $compra->status = $cuenta->estado == 'Pagado' ? 'Pagado' : 'Parcial';
         $compra->pago_id = $pago->id;
-        $compra->status = 'Pagado';
         $compra->save();
-
-        Alert::success('¡Exito!', 'Cuenta por pagar actualizada correctamente')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
-
+    
+        // Notificación de éxito
+        Alert::success('¡Exito!', 'Pago registrado correctamente')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
+        
+        // Redirigir al usuario con mensaje de éxito
         return redirect()->route('cuentas-por-pagar.index')->with('success', 'Cuenta por pagar actualizada con éxito.');
     }
+    
 
     // Eliminar una cuenta por pagar
     public function destroy($id)

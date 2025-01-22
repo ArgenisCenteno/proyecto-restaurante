@@ -7,7 +7,6 @@
                 <th>Creado por</th>
                 <th>Monto Total</th>
                 <th>Fecha</th>
-                
                 <th>Estado</th>
                 <th>Opciones</th>
             </tr>

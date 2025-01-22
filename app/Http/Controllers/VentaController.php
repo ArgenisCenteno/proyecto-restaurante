@@ -255,6 +255,7 @@ class VentaController extends Controller
             $venta->vendedor_id = $userId;
             $venta->monto_total = $montoTotal;
             $venta->status = 'Pendiente'; // Venta pendiente
+            $venta->tipo = 'Crédito'; // Venta pendiente
             $venta->save();
     
             $cuentaPorCobrar = new CuentaPorCobrar();

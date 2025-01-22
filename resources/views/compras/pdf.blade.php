@@ -126,7 +126,7 @@
         <div style="display: flex; justify-content: space-between; margin-top: 20px; align-items: flex-start;">
             <!-- Contenedor del QR -->
 
-
+            @if($compra->tipo == 'Regular')
             <!-- Contenedor de los montos -->
             <div
                 style="text-align: right; padding: 10px; border: 2px solid #ddd; border-radius: 8px; background-color: #f9f9f9; flex-grow: 1;">
@@ -138,6 +138,18 @@
                     {{$compra->pago->impuestos}}</p>
                 <p style="margin: 0; padding: 5px;"><strong>MONTO TOTAL:</strong> {{$compra->pago->monto_total}}</p>
             </div>
+            @else
+            <div  
+                style="text-align: right; padding: 10px; border: 2px solid #ddd; border-radius: 8px; background-color: #f9f9f9; flex-grow: 1;">
+                <div style="text-align: left; margin-right: 20px;">
+                </div>
+                <p style="margin: 0; padding: 5px; border-bottom: 1px solid #ddd;"><strong>SUBTOTAL:</strong>
+                    {{$subtotal}}</p>
+                <p style="margin: 0; padding: 5px; border-bottom: 1px solid #ddd;"><strong>IVA (16%):</strong>
+                    {{$impuestos}}</p>
+                <p style="margin: 0; padding: 5px;"><strong>MONTO TOTAL:</strong> {{$subtotal + $impuestos}}</p>
+            </div>
+            @endif
         </div>
 
 

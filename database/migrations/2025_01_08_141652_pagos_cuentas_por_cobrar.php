@@ -9,7 +9,7 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+  /*  public function up(): void
     {
         Schema::table('pagos_cuentas', function (Blueprint $table) {
             $table->id(); // Llave primaria
@@ -22,14 +22,14 @@ return new class extends Migration
     }
     
     /**
-     * Reverse the migrations.
+   //  * Reverse the migrations.
      */
-    public function down(): void
+  /*  public function down(): void
     {
         Schema::table('pagos_cuentas', function (Blueprint $table) {
             $table->dropColumn(['id', 'pago_id', 'user_id', 'cliente_id', 'monto']); // Eliminación de columnas
             $table->dropTimestamps(); // Eliminación de created_at y updated_at
         });
-    }
+    }*/
     
 };

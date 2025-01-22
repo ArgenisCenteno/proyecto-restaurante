@@ -91,14 +91,14 @@
                     <h5>Caja</h5>
                 </div>
                 <select name="caja" id="caja" class="form-control select2 mb-2 mt-2">
-                     
+
                 </select>
 
                 <div id="metodosPagoList"></div>
             </div>
-            <div >
-               
-                <div >
+            <div>
+
+                <div>
                     <div class="text-center mt-1 card pt-2 pb-2 bg-dark text-white w-full"
                         style="box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;">
                         <h5>Proveedor</h5>
@@ -131,7 +131,7 @@
 
         <hr />
 
-        
+
 
 
 

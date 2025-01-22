@@ -107,7 +107,15 @@
                 </tr>
             </thead>
             <tbody>
+                @php 
+                    $subtotal = 0;
+                    $impuestos = 0;
+                @endphp
                 @foreach ($venta->detalleVentas as $detalle)
+                @php
+                    $subtotal += $detalle->neto;
+                    $impuestos += $detalle->impuesto;
+                 @endphp
                     <tr>
                         <td style="padding: 8px; border-bottom: 1px solid #ddd;">{{$detalle->producto->nombre}}</td>
                         <td style="padding: 8px; border-bottom: 1px solid #ddd;">{{$detalle->cantidad}}</td>
@@ -126,9 +134,9 @@
         <div style="display: flex; justify-content: space-between; margin-top: 20px; align-items: flex-start;">
             <!-- Contenedor del QR -->
 
-
+            @if($venta->tipo == 'Regular')
             <!-- Contenedor de los montos -->
-            <div
+            <div  
                 style="text-align: right; padding: 10px; border: 2px solid #ddd; border-radius: 8px; background-color: #f9f9f9; flex-grow: 1;">
                 <div style="text-align: left; margin-right: 20px;">
                 </div>
@@ -138,7 +146,19 @@
                     {{$venta->pago->impuestos}}</p>
                 <p style="margin: 0; padding: 5px;"><strong>MONTO TOTAL:</strong> {{$venta->pago->monto_total}}</p>
             </div>
-        </div>
+            @else
+            <div  
+                style="text-align: right; padding: 10px; border: 2px solid #ddd; border-radius: 8px; background-color: #f9f9f9; flex-grow: 1;">
+                <div style="text-align: left; margin-right: 20px;">
+                </div>
+                <p style="margin: 0; padding: 5px; border-bottom: 1px solid #ddd;"><strong>SUBTOTAL:</strong>
+                    {{$subtotal}}</p>
+                <p style="margin: 0; padding: 5px; border-bottom: 1px solid #ddd;"><strong>IVA (16%):</strong>
+                    {{$impuestos}}</p>
+                <p style="margin: 0; padding: 5px;"><strong>MONTO TOTAL:</strong> {{$subtotal + $impuestos}}</p>
+            </div>
+            @endif
+         </div>
 
 
 

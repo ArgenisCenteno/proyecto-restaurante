@@ -11,6 +11,7 @@ use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\PdfController;
 use App\Http\Controllers\ProductoController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\VentaController;
 use Illuminate\Support\Facades\Route;
 
@@ -105,6 +106,7 @@ Route::resource('proveedores', App\Http\Controllers\ProveedorController::class);
 /* PAGOS */
 Route::resource('pagos', App\Http\Controllers\PagoController::class);
 Route::get('/pdfPago/{id}', [PdfController::class, 'pdfPago'])->name('pagos.pdf');
+Route::post('/verificarCaja', [UserController::class, 'verificarCaja'])->name('verificarCaja');
 
 /* PAGOS */
 Route::resource('usuarios', App\Http\Controllers\UserController::class);

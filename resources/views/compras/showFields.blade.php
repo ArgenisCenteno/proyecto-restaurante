@@ -30,26 +30,20 @@
                     <div class="form-group">
                         <label for="monto_total">Monto Total</label>
                         <input type="text" class="form-control" id="monto_total"
-                            value="{{ number_format($compra->pago->monto_total, 2) }}" readonly>
+                            value="{{ number_format($compra->monto_total, 2) }}" readonly>
                     </div>
                 </div>
             </div>
 
             <div class="row p-3">
                 <!-- Monto Neto -->
-                <div class="col-md-4 mb-3">
-                    <div class="form-group">
-                        <label for="monto_neto">Monto Neto</label>
-                        <input type="text" class="form-control" id="monto_neto"
-                            value="{{ number_format($compra->pago->monto_neto, 2) }}" readonly>
-                    </div>
-                </div>
+                 
 
                 <!-- Estado del Pago -->
                 <div class="col-md-4 mb-3">
                     <div class="form-group">
                         <label for="status_pago">Estado del Pago</label>
-                        <input value="{{ $compra->pago->status }}" readonly class="form-control" />
+                        <input value="{{ $compra->pago->status ?? 'Sin pagar' }}" readonly class="form-control" />
                     </div>
                 </div>
 
@@ -102,36 +96,9 @@
     </div>
 
     <!-- Pago -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5>Detalles del Pago</h5>
-        </div>
-        <div class="card-body  table-responsive">
-            <table class="table table-hover ">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Monto Total</th>
-                        <th>Monto Neto</th>
-                        <th>Impuestos</th>
-                        <th>Tasa de Dólar</th>
-                        <th>Fecha de Pago</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>{{ $compra->pago->id }}</td>
-                        <td>{{ number_format($compra->pago->monto_total, 2) }}</td>
-                        <td>{{ number_format($compra->pago->monto_neto, 2) }}</td>
-                        <td>{{ number_format($compra->pago->impuestos, 2) }}</td>
-                        <td>{{ number_format($compra->pago->tasa_dolar, 2) }}</td>
-                        <td>{{ $compra->pago->fecha_pago }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
+     
+    @if(isset($venta->pago) && $venta->tipo == 'Regular')
+    <div class="mb-4">
     <div class="card mb-4">
         <div class="card-header">
             <h5>Método de Pago</h5>
@@ -172,3 +139,4 @@
         </div>
     </div>
 </div>
+@endif

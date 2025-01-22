@@ -9,7 +9,7 @@
                 <th>Descripción</th>
                 <th>Monto</th>
                 <th>Fecha</th>
-                <th>Pago</th>
+                <th>Monto Pagado</th>
                 <th>Estado</th>
                 <th>Acciones</th>
             </tr>
@@ -33,7 +33,7 @@
                 { data: 'descripcion', name: 'descripcion' },
                 { data: 'monto', name: 'monto' },
                 { data: 'fecha', name: 'fecha' },
-                { data: 'pago_id', name: 'pago_id' },
+                { data: 'monto_pagado', name: 'monto_pagado' },
                 { data: 'estado', name: 'estado' },
                 { data: 'actions', name: 'actions', orderable: false, searchable: false },
             ]
