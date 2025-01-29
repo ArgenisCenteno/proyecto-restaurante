@@ -103,6 +103,7 @@ class CajaController extends Controller
             if ($apertura->estado == 'Operando') {
                 $movimientos = Movimiento::where('apertura_id', $apertura->id)->get();
                 $transacciones = Transaccion::where('apertura_id', $apertura->id)->get();
+                
                 return view('caja.cierre')->with('caja', $caja)->with('movimientos', $movimientos)->with('transacciones', $transacciones);
             }
         }
@@ -225,9 +226,8 @@ class CajaController extends Controller
 
         $apertura->estado = 'Finalizado';
         $apertura->save();
-        Alert::success('¡Exito!', 'Caja cerrada')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
 
-        return redirect()->route('cajas.index')->with('success', 'Apertura de caja cerrada exitosamente.');
+        return redirect()->route('caja.pdf', $apertura->id);
 
     }
 

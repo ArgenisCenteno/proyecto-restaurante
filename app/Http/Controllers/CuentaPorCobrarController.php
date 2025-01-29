@@ -51,7 +51,9 @@ class CuentaPorCobrarController extends Controller
                 ->addColumn('fecha', function ($row) {
                     return $row->created_at->format('Y-m-d');
                 })
-
+                ->addColumn('cliente', function ($row) {
+                    return $row->venta->user->name ?? '';
+                })
                 // Columna para el pago_id, si es nulo muestra "Sin pagar"
                 ->addColumn('pago_id', function ($row) {
                     return $row->pago_id ? $row->pago_id : 'Sin pagar';

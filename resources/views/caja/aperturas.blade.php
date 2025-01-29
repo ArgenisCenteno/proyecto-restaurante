@@ -31,6 +31,7 @@
                                             <th>Fecha de Creación</th>
                                             <th>Última Actualización</th>
                                             <th>Estado</th>
+                                            <th>Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -48,6 +49,9 @@
                                                     <span class="badge badge-{{ $apertura->estado === 'Finalizado' ? 'success' : 'danger' }}">
                                                         {{ $apertura->estado }}
                                                     </span>
+                                                </td>
+                                                <td>
+                                                    <a href="{{ route('caja.pdf', $apertura->id) }}" target="blank" class="btn btn-warning">Imprimir</a>
                                                 </td>
                                             </tr>
                                         @empty

@@ -62,8 +62,9 @@
             <th>Banco Origen</th>
             <th>Banco Destino</th>
             <th>Referencia</th>
-            <th>Monto Abonado</th>
             <th>Fecha de Pago</th>
+            <th>Monto Abonado</th>
+          
         </tr>
     </thead>
     @php
@@ -80,7 +81,7 @@
                
                $deuda += $pagoCuenta->monto_abono 
             @endphp
-            @foreach($formaPago as $pago)
+            @foreach($formaPago as $pago)  
                 <td>{{ $pago->banco_origen ?? '' }}</td>
                 <td>{{ $pago->banco_destino ?? '' }}</td>
                 <td>{{ $pago->numero_referencia ?? '' }}</td>
@@ -153,16 +154,32 @@
                             <option value="Punto de Venta">Punto de Venta</option>
                         </select>
                     </div>
-
+ 
                     <!-- Campos dinámicos -->
                     <div id="detallesPago" class="d-none">
                         <div class="form-group">
                             <label for="banco_origen"><strong>Banco Origen</strong></label>
-                            <input type="text" class="form-control" name="banco_origen" id="banco_origen">
+                            <select class="form-control" id="bancoOrigen" name="banco_origen">
+                                <option value="">Seleccione Banco Origen (Opcional)</option>
+                                <option value="Banesco">Banesco</option>
+                                <option value="Banco de Venezuela">Banco de Venezuela</option>
+                                <option value="Mercantil">Mercantil</option>
+                                <option value="BOD">BOD</option>
+                                <option value="Banco Bicentenario">Banco Bicentenario</option>
+                                <option value="Banco del Tesoro">Banco del Tesoro</option>
+                                <option value="Banco Plaza">Banco Plaza</option>
+                                <option value="Banco Nacional de Crédito">Banco Nacional de Crédito</option>
+                                <option value="Banco Provincial">Banco Provincial</option>
+                                <option value="Banco Exterior">Banco Exterior</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label for="banco_destino"><strong>Banco Destino</strong></label>
-                            <input type="text" class="form-control" name="banco_destino" id="banco_destino">
+                            <select class="form-control" id="bancoDestino" name="banco_destino">
+                                <option value="">Seleccione Banco Destino (Opcional)</option>
+                                <option value="Banesco">Banesco</option>
+                                <option value="Banco de Venezuela">Banco de Venezuela</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label for="referencia"><strong>Referencia</strong></label>

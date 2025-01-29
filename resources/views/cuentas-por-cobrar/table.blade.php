@@ -5,6 +5,7 @@
         <thead>
             <tr>
                 <th>#</th>
+                <th>Cliente</th>
                 <th>Tipo</th>
                 <th>Descripción</th>
                 <th>Monto</th>
@@ -29,6 +30,7 @@
             ajax: '{{ route('cuentas-por-cobrar.index') }}',
             columns: [
                 { data: 'id', name: 'id', orderable: false, searchable: false },
+                { data: 'cliente', name: 'cliente' },
                 { data: 'tipo', name: 'tipo' },
                 { data: 'descripcion', name: 'descripcion' },
                 { data: 'monto', name: 'monto' },

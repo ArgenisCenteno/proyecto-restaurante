@@ -107,10 +107,10 @@ Route::resource('proveedores', App\Http\Controllers\ProveedorController::class);
 Route::resource('pagos', App\Http\Controllers\PagoController::class);
 Route::get('/pdfPago/{id}', [PdfController::class, 'pdfPago'])->name('pagos.pdf');
 Route::post('/verificarCaja', [UserController::class, 'verificarCaja'])->name('verificarCaja');
+Route::get('/pdfCaja/{id}', [PdfController::class, 'pdfEstadoCuenta'])->name('caja.pdf');
 
 /* PAGOS */
 Route::resource('usuarios', App\Http\Controllers\UserController::class);
-Route::get('/pdfUser/{id}', [PdfController::class, 'pdfEstadoCuenta'])->name('usuarios.pdf');
 });
 
 
