@@ -60,7 +60,7 @@
                     <tr>
                         <th>#</th>
                         <th>Producto</th>
-                        <th>Precio</th>
+                        
                         <th>Cantidad</th>
                         <th>Subtotal</th>
                         <th>Impuesto</th>
@@ -72,8 +72,7 @@
                     <tr>
                         <td>{{ $detalle->id }}</td>
                         <td>{{ $detalle->producto->nombre }}</td>
-                        <td>{{ number_format($detalle->precio_producto, 2) }}</td>
-                        <td>{{ $detalle->cantidad }}</td>
+                         <td>{{ $detalle->cantidad }}</td>
                         <td>{{ number_format($detalle->neto, 2) }}</td>
                         <td>{{ number_format($detalle->impuesto, 2) }}</td>
                         <td>{{ number_format($detalle->impuesto + $detalle->neto, 2) }}</td>
