@@ -120,23 +120,42 @@
                         style="box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;">
                         <h5>Cliente</h5>
                     </div>
-                    <div class="d-flex flex-column mb-3" style="width: 100% important">
+
+                    <div class="d-flex flex-column mb-3" style="width: 100% !important;">
                         <div data-mdb-ripple-init class="btn-group-vertical" role="group"
                             aria-label="Vertical button group">
-
-
-
-
                             <select name="user_id" id="user_id" class="form-control select2 mb-2 mt-2">
                                 @foreach($users as $id => $name)
                                     <option value="{{ $id }}">{{ $name }}</option>
                                 @endforeach
                             </select>
-
-
                         </div>
 
+                        <button type="button" class="btn btn-primary mt-2 " id="showRegisterForm">Registrar
+                            Cliente</button>
+
+                        <div id="registerClientForm" class="mt-3 card p-3" style="display: none;">
+                            <h5 class="text-center bg-dark text-white p-2">Nuevo Cliente</h5>
+                            <div class="mb-2">
+                                <label for="cedula" class="form-label">Cédula</label>
+                                <input type="text" class="form-control" id="cedula" name="cedula"
+                                    placeholder="Ingrese la cédula">
+                            </div>
+                            <div class="mb-2">
+                                <label for="name" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="name" name="name"
+                                    placeholder="Ingrese el nombre">
+                            </div>
+                            <div class="mb-2">
+                                <label for="email" class="form-label">Correo Electrónico</label>
+                                <input type="email" class="form-control" id="email" name="email"
+                                    placeholder="Ingrese el email">
+                            </div>
+                         </div>
                     </div>
+
+
+
                 </div>
             </div>
         </div>
@@ -145,40 +164,60 @@
 
 
 
- 
+
         <hr />
 
 
 
 
 
-        <button style="width: 100%" type="button" id="submitBtn" class="btn btn-primary" disabled data-bs-toggle="modal" data-bs-target="#confirmModal">Generar Venta</button>
+        <button style="width: 100%" type="button" id="submitBtn" class="btn btn-primary" disabled data-bs-toggle="modal"
+            data-bs-target="#confirmModal">Generar Venta</button>
 
         </div>
 
     </section>
-<!-- Botón para abrir el modal -->
+    <!-- Botón para abrir el modal -->
 
-<!-- Modal de confirmación -->
-<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header bg-warning">
-        <h2 class="modal-title" id="confirmModalLabel">Confirmar venta</h2>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <h3 class="text-black" id="totalModal"></h3>
-        <h3 class="text-success" id="totalModalBs"></h3>
-        <div id="confirmProductoCarrito" class="productoCarrito"></div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-primary" id="confirmVenta">Confirmar Venta</button>
-      </div>
+    <!-- Modal de confirmación -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h2 class="modal-title" id="confirmModalLabel">Confirmar venta</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h3 class="text-black" id="totalModal"></h3>
+                    <h3 class="text-success" id="totalModalBs"></h3>
+                    <div id="confirmProductoCarrito" class="productoCarrito"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="confirmVenta">Confirmar Venta</button>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
 </form>
 
+<script>
+    document.getElementById('showRegisterForm').addEventListener('click', function () {
+        let form = document.getElementById('registerClientForm');
+        form.style.display = (form.style.display === 'none' || form.style.display === '') ? 'block' : 'none';
+    });
+
+    document.getElementById('saveClient').addEventListener('click', function () {
+        let cedula = document.getElementById('cedula').value;
+        let name = document.getElementById('name').value;
+        let email = document.getElementById('email').value;
+
+        if (!cedula || !name || !email) {
+            alert('Todos los campos son obligatorios');
+            return;
+        }
+ 
+        document.getElementById('registerClientForm').style.display = 'none';
+    });
+</script>

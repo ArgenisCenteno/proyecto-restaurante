@@ -16,6 +16,7 @@ use App\Models\Transaccion;
 use App\Models\User;
 use App\Models\Venta;
 use Carbon\Carbon;
+use Hash;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\DataTables;
@@ -198,7 +199,30 @@ class VentaController extends Controller
     {
        // dd("test");
         $caja = Caja::find(1);
+       
+        $clienteId = 1;
+        if($request->cedula && $request->email && $request->name){
+             $consulta = User::where('email', $request->email)->first();
+             if ($consulta) {
+                Alert::error('¡Error!', 'Este email se encuentra registrado')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
+                return redirect()->back();
+            }
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' =>  Hash::make($request->cedula), // Encriptar la contraseña
+                'dni' => $request->cedula, 
+                'status' => 'Activo',
+            ]);
     
+            // Asignar el rol al usuario
+            $user->assignRole($request->role);
+
+            $clienteId = $user->id;
+        }else{
+            $clienteId = $request->user_id;
+        }
+
         if (!$caja) {
             Alert::error('¡Error!', 'No hay caja disponible')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
             return redirect()->back();
@@ -251,7 +275,7 @@ class VentaController extends Controller
         // Si el método es "A crédito", generar la CuentaPorCobrar y guardar la venta como "Pendiente"
         if ($metodoCredito) {
             $venta = new Venta();
-            $venta->user_id = $request->user_id;
+            $venta->user_id =  $clienteId;
             $venta->vendedor_id = $userId;
             $venta->monto_total = $montoTotal;
             $venta->status = 'Pendiente'; // Venta pendiente
@@ -303,7 +327,7 @@ class VentaController extends Controller
             $pago->save();
 
             $venta = new Venta();
-            $venta->user_id = $request->user_id;
+            $venta->user_id =  $clienteId;
             $venta->pago_id = $pago->id;
             $venta->vendedor_id = $userId;
             $venta->monto_total = $montoTotal;
@@ -333,7 +357,7 @@ class VentaController extends Controller
             $recibo->monto = $montoTotal;
             $recibo->estatus = 'Pagado';
             $recibo->pago_id = $pago->id;
-            $recibo->user_id = $request->user_id;
+            $recibo->user_id =  $clienteId;
             $recibo->activo = 1;
             $recibo->creado_id = $userId;
             $recibo->descuento = $request->descuento;

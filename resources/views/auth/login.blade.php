@@ -48,6 +48,9 @@
                 <div class="pt-1 mb-4">
                   <button class="btn btn-primary" type="submit">Acceder</button>
                 </div>
+                <p class=" mb-5 pb-lg-2">
+              <a  href="{{ route('password.request') }}">Recuperar Contraseña</a>
+            </p>
 
               </form>
             </div>
