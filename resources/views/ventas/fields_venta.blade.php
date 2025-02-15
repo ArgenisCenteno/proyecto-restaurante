@@ -80,9 +80,17 @@
                             <input type="text" class="form-control" id="numeroReferencia"
                                 placeholder=" Referencia (Opcional)">
                         </div>
+                        
+                        
                         <div class="col-md-6">
                             <button type="button" class="btn btn-success w-100" id="agregarMetodoPago">Agregar
                                 Método</button>
+                                
+                        </div>
+                        <div class="col-md-12">
+                        <p id="mensajeAdvertencia" style="display: none; color: red; font-weight: bold;">
+                        Por favor, complete los campos Banco Origen, Banco Destino y Referencia.
+                        </p>
                         </div>
                     </div>
                 </div>
@@ -151,7 +159,7 @@
                                 <input type="email" class="form-control" id="email" name="email"
                                     placeholder="Ingrese el email">
                             </div>
-                         </div>
+                        </div>
                     </div>
 
 
@@ -217,7 +225,35 @@
             alert('Todos los campos son obligatorios');
             return;
         }
- 
+
         document.getElementById('registerClientForm').style.display = 'none';
     });
+</script>
+
+<script>
+    $(document).ready(function () {
+        $('#metodoPago, #bancoOrigen, #bancoDestino, #numeroReferencia').on('change input', function () {
+            // Obtener los valores de los campos
+            var metodoPago = $('#metodoPago').val();
+            var bancoOrigen = $('#bancoOrigen').val();
+            var bancoDestino = $('#bancoDestino').val();
+            var numeroReferencia = $('#numeroReferencia').val();
+
+            // Comprobamos si el método de pago es Transferencia, Pago Movil o Punto de Venta
+            var metodoRequiereCampos = (metodoPago === 'Transferencia' || metodoPago === 'Pago Movil' || metodoPago === 'Punto de Venta');
+
+            // Verificamos si los campos están vacíos o no
+            var camposCompletos = (bancoOrigen !== '' && bancoDestino !== '' && numeroReferencia !== '');
+
+            // Si el método requiere campos y los campos no están completos, mostramos advertencia y deshabilitamos el botón
+            if (metodoRequiereCampos && !camposCompletos) {
+                $('#agregarMetodoPago').prop('disabled', true);
+                $('#mensajeAdvertencia').show(); // Mostrar mensaje de advertencia
+            } else {
+                $('#agregarMetodoPago').prop('disabled', false);
+                $('#mensajeAdvertencia').hide(); // Ocultar mensaje de advertencia
+            }
+        });
+    });
+
 </script>
