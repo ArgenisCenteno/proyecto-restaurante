@@ -9,18 +9,21 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+   public function up(): void
     {
         Schema::table('ventas', function (Blueprint $table) {
-            $table->string('tipo')->default('Regular'); // Agrega el campo 'tipo' con valor por defecto
-       
+            $table->foreignId('mesa_id')
+                ->nullable()
+                ->constrained('mesas')
+                ->onDelete('set null');
         });
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::table('ventas', function (Blueprint $table) {
-            $table->dropColumn('tipo');
+            $table->dropForeign(['mesa_id']);
+            $table->dropColumn('mesa_id');
         });
     }
 };

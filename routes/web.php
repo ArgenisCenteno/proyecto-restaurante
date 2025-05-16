@@ -76,6 +76,8 @@ Route::get('/cierres', [CajaController::class, 'cierresIndex'])->name('caja.cier
 Route::get('/ventas/export', [VentaController::class, 'export'])->name('ventas.export');
 
 Route::resource('ventas', App\Http\Controllers\VentaController::class);
+Route::resource('mesas', App\Http\Controllers\MesaController::class);
+Route::resource('detallesVenta', App\Http\Controllers\DetalleVentaController::class);
 
 Route::get('/vender', [VentaController::class, 'vender'])->name('ventas.vender');
 Route::get('/datatableProductoVenta', [VentaController::class, 'datatableProductoVenta'])->name('ventas.datatableProductoVenta');

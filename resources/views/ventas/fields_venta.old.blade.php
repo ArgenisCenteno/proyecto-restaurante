@@ -74,12 +74,12 @@
                 <div class="row g-3 mt-3">
                     <div class="col-md-12">
                         <label for=""><i class="fas fa-table text-success"></i> Mesa</label>
-                        <select class="form-select" id="Mesa" name="mesa">
-                            <option value="Mesa 1">Mesa 1</option>
-                            <option value="Mesa 2">Mesa 2</option>
-                            <option value="Mesa 3">Mesa 3</option>
-                            <option value="Mesa 4">Mesa 4</option>
-                            <option value="Mesa 5">Mesa 5</option>
+                        <select class="form-select" id="mesa_id" name="mesa_id">
+                            <option value="">Seleccione una mesa</option>
+                            @foreach($mesas as $mesa)
+                                <option value="{{ $mesa->id }}">{{ $mesa->numero }}</option>
+                            @endforeach
+                          
                         </select>
                     </div>
 

@@ -39,4 +39,14 @@ class Venta extends Model
     {
         return $this->hasMany(DetalleVenta::class, 'id_venta');
     }
+    public function mesa()
+    {
+        return $this->belongsTo(Mesa::class);
+    }
+    public function cuenta()
+{
+    return $this->hasOne(CuentaPorCobrar::class, 'venta_id');
+}
+
+
 }

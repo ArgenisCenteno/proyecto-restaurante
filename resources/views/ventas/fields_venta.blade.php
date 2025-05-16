@@ -41,12 +41,13 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <select class="form-select" id="metodoPago">
+                                  <option value="A credito">A credito</option>
                                 <option value="Efectivo">Efectivo</option>
                                 <option value="Transferencia">Transferencia</option>
                                 <option value="Pago Movil">Pago Móvil</option>
                                 <option value="Divisa">Divisa</option>
                                 <option value="Punto de Venta">Punto de Venta</option>
-                                <option value="A credito">A credito</option>
+                              
                             </select>
                         </div>
                         <div class="col-md-6">
@@ -113,14 +114,15 @@
                         <h5>Mesa</h5>
 
                     </div>
-                    <select name="mesa" id="mesa" class="form-control select2 mb-2 mt-2">
-                        <option value="Mesa 1">Mesa 1</option>
-                        <option value="Mesa 2">Mesa 2</option>
-                        <option value="Mesa 3">Mesa 3</option>
-                        <option value="Mesa 4">Mesa 4</option>
-                        <option value="Mesa 5">Mesa 5</option>
-                        <option value="Mesa 6">Mesa 6</option>
-                    </select>
+               
+                        <select class="form-select select2 mt-4" id="mesa_id" name="mesa_id">
+                            <option value="">Seleccione una mesa</option>
+                            @foreach($mesas as $mesa)
+                                <option value="{{ $mesa->id }}">{{ $mesa->numero }}</option>
+                            @endforeach
+                          
+                        </select>
+                 
 
                 </div>
                 <div>

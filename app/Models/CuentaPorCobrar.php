@@ -27,5 +27,5 @@ class CuentaPorCobrar extends Model
     public function venta()
     {
         return $this->belongsTo(Venta::class);
-    }
+    }  
 } 

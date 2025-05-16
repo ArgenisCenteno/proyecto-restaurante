@@ -5,6 +5,7 @@ use App\Exports\CuentasPorCobrarExport;
 use App\Models\AperturaCaja;
 use App\Models\Caja;
 use App\Models\CuentaPorCobrar;
+use App\Models\Mesa;
 use App\Models\Movimiento;
 use App\Models\Pago;
 use App\Models\PagosCuentasPorCobrar;
@@ -70,8 +71,8 @@ class CuentaPorCobrarController extends Controller
                 ->addColumn('actions', function ($row) {
                     $editUrl = route('cuentas-por-cobrar.show', $row->id);
                     $deleteUrl = route('cuentas-por-cobrar.destroy', $row->id);
-                  
-    
+
+
                     return '
                         <a href="' . $editUrl . '" class="btn btn-primary btn-sm">Editar</a>
                         <form action="' . $deleteUrl . '" method="POST" style="display:inline;" class="btn-delete">
@@ -113,56 +114,59 @@ class CuentaPorCobrarController extends Controller
         $cuenta = CuentaPorCobrar::findOrFail($id);
         $cajas = Caja::all();
         $pagos = PagosCuentasPorCobrar::where('cuenta_por_cobrar_id', $id)->get();
-       
+
         return view('cuentas-por-cobrar.show', compact('cuenta', 'pagos', 'cajas'));
     }
 
     // Método para actualizar una cuenta por cobrar
     public function update(Request $request, $id)
     {
+       
         $cuenta = CuentaPorCobrar::findOrFail($id);
-    
+
         if (!$request->caja) {
             Alert::error('¡Error!', 'Debe seleccionar una caja')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
             return redirect()->back();
         }
-    
+
         $caja = Caja::find($request->caja);
         $apertura = AperturaCaja::where('caja_id', $caja->id)->where('estado', 'Operando')->first();
-    
+
         if (!$apertura) {
             Alert::error('¡Error!', 'La caja seleccionada no está abierta')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
             return redirect()->back();
         }
-    
+
         if ($cuenta->estado === 'Pagado') {
             Alert::error('¡Error!', 'Esta cuenta ya fue pagada en su totalidad')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
             return redirect()->back();
         }
-    
-       // dd($request);
+
+        // dd($request);
         // Determinar el monto a pagar
         $montoPago = $request->filled('otro_monto') ? $request->otro_monto : $request->monto_pago;
         $saldoRestante = $cuenta->monto - $cuenta->monto_pagado;
         $montoPago = floatval($montoPago);  // Convertir a float si es string
         $saldoRestante = floatval($saldoRestante);  // Convertir a float si es string
-        
 
-     /*   if ($montoPago > $saldoRestante) {
-            Alert::error('¡Error!', 'El monto ingresado supera el saldo restante')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
-            return redirect()->back();
-        }*/
+
+        /*   if ($montoPago > $saldoRestante) {
+               Alert::error('¡Error!', 'El monto ingresado supera el saldo restante')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
+               return redirect()->back();
+           }*/
 
         $metodo = [
-           [ "metodo" => $request->tipo_pago,
-            "cantidad" => $montoPago,
-            "banco_origen" => $request->banco_origen,
-            "banco_destino" => $request->banco_destino,
-            "numero_referencia" => $request->referencia,
-            "monto_bs" => $montoPago,
-            "monto_dollar" => 0,]
+            [
+                "metodo" => $request->tipo_pago,
+                "cantidad" => $montoPago,
+                "banco_origen" => $request->banco_origen,
+                "banco_destino" => $request->banco_destino,
+                "numero_referencia" => $request->referencia,
+                "monto_bs" => $montoPago,
+                "monto_dollar" => 0,
+            ]
         ];
-    
+
         // Registrar el pago
         $pago = new Pago();
         $pago->tipo = 'Venta';
@@ -173,21 +177,21 @@ class CuentaPorCobrarController extends Controller
         $pago->creado_id = Auth::user()->id;
         $pago->fecha_pago = Carbon::now();
         $pago->save();
-    
+
         // Registrar en PagosCuentasPorCobrar
         $pagosCuentasPorCobrar = new PagosCuentasPorCobrar();
         $pagosCuentasPorCobrar->pago_id = $pago->id;
         $pagosCuentasPorCobrar->cuenta_por_cobrar_id = $cuenta->id;
         $pagosCuentasPorCobrar->monto_abono = $montoPago;
-         
+
         $pagosCuentasPorCobrar->save();
-    
+
         // Actualizar la cuenta por cobrar
         $cuenta->monto_pagado += $montoPago;
         $cuenta->estado = $cuenta->monto_pagado >= $cuenta->monto ? 'Pagado' : 'Parcialmente Pagado';
         $cuenta->pago_id = $pago->id;
         $cuenta->save();
-    
+
         // Crear el recibo
         $recibo = new Recibo();
         $recibo->tipo = 'Venta';
@@ -199,7 +203,7 @@ class CuentaPorCobrarController extends Controller
         $recibo->creado_id = Auth::user()->id;
         $recibo->descuento = $request->descuento ?? 0;
         $recibo->save();
-    
+
         // Registrar el movimiento en la caja
         $movimiento = new Movimiento();
         $movimiento->caja_id = $caja->id;
@@ -208,7 +212,7 @@ class CuentaPorCobrarController extends Controller
         $movimiento->descripcion = "Pago parcial de venta";
         $movimiento->fecha = now();
         $movimiento->apertura_id = $apertura->id;
-    
+
         if ($request->forma_pago === 'Divisa') {
             $movimiento->monto_dolares = $montoPago;
             $movimiento->monto_bolivares = 0;
@@ -216,9 +220,9 @@ class CuentaPorCobrarController extends Controller
             $movimiento->monto_bolivares = $montoPago;
             $movimiento->monto_dolares = 0;
         }
-    
+
         $movimiento->save();
-    
+
         // Registrar la transacción
         $transaccion = new Transaccion();
         $transaccion->caja_id = $caja->id;
@@ -230,25 +234,39 @@ class CuentaPorCobrarController extends Controller
         $transaccion->fecha = Carbon::now();
         $transaccion->apertura_id = $apertura->id;
         $transaccion->save();
-    
+
         // Actualizar el estado de la venta si se completó el pago
         $venta = Venta::find($cuenta->venta_id);
         $venta->status = ($cuenta->estado === 'Pagado') ? 'Pagado' : 'Parcialmente Pagado';
+
         $venta->pago_id = $pago->id;
         $venta->save();
-    
+ //dd($venta->created_at->toDateString() === Carbon::today()->toDateString());
+        if (
+            $venta->mesa_id && $venta->status === 'Pagado' && $venta->created_at->toDateString() === Carbon::today()->toDateString()
+        ) {
+            $mesa = Mesa::find($venta->mesa_id);
+            $mesa->estado = 'Disponible';
+            $mesa->save();
+        }
+
         Alert::success('¡Éxito!', 'Pago registrado correctamente')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
         return redirect()->route('cuentas-por-cobrar.index');
     }
-    
-    
+
+
 
     // Método para eliminar una cuenta por cobrar
     public function destroy($id)
     {
         $cuenta = CuentaPorCobrar::findOrFail($id);
+        if (!$cuenta) {
+            Alert::error('¡Error!', 'No se encontró la cuenta por cobrar')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
+            return redirect()->route('cuentas-por-cobrar.index');
+        }
         $cuenta->delete();
-        return response()->json(null, 204);
+        Alert::success('¡Éxito!', 'Registro elimnado correctamente')->showConfirmButton('Aceptar', 'rgba(79, 59, 228, 1)');
+        return redirect()->route('cuentas-por-cobrar.index');
     }
 
     public function exportarCuentasPorCobrar(Request $request)

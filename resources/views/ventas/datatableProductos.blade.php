@@ -47,6 +47,7 @@
         $('#productos-table2').DataTable({
             processing: true,
             serverSide: true,
+             pageLength: 3,
             responsive: true,
             ajax: "{{ route('ventas.datatableProductoVenta') }}",
             dataType: 'json',
@@ -57,7 +58,7 @@
                     name: 'imagenes',
                     render: function (data) {
                         // Verificamos si hay imágenes y devolvemos la primera
-                        return data.length > 0 ? `<img src="${data[0].url}" alt="Imagen" style="width: 100px; height: auto;">` : 'Sin imagen'; // Cambia 'url' por el campo correcto de tu objeto de imagen
+                        return data.length > 0 ? `<img src="${data[0].url}" alt="Imagen" style="width: 50px; height: auto;">` : 'Sin imagen'; // Cambia 'url' por el campo correcto de tu objeto de imagen
                     }
                 },
                 { data: 'nombre', name: 'nombre' },
@@ -333,10 +334,12 @@ if (productIva === 'Sí') {
         }
         let totalVenta = parseFloat($('#totalVenta').text().replace('Bs', ''));
         let cancelado = parseFloat($('#cancelado').text().replace('Bs', ''));
+let totalF = (cancelado + montoBs).toFixed(2);
 
-        if (cancelado + montoBs > totalVenta) {
+       // console.log(totalF, totalF > totalVenta);
+        if (totalF > totalVenta) {
             $('#advertencia').show();
-        } else if (cancelado + montoBs <= totalVenta) {
+        } else if (totalF <= totalVenta) {
             $('#advertencia').hide();
             cancelado += montoBs;
 

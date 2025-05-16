@@ -1,10 +1,10 @@
 <header id="header" class="header fixed-top" style="margin-bottom: 80px !important;">
   <!-- Top Bar -->
-  <div class="topbar d-flex align-items-center bg-warning">
+  <div class="topbar d-flex align-items-center bg-dark">
     <div class="container d-flex justify-content-between">
       <div class="contact-info d-flex align-items-center">
         <i class="bi bi-envelope d-flex align-items-center">
-          <a href="mailto:contact@example.com">cumanagrill@gmail.com</a>
+          <a href="mailto:contact@example.com">ortimed@gmail.com</a>
         </i>
         <i class="bi bi-phone d-flex align-items-center ms-4">
           <span>+58 04248085560</span>
@@ -20,10 +20,10 @@
   </div>
   <!-- End Top Bar -->
 
-  <div class="branding d-flex align-items-center">
+  <div class="branding d-flex align-items-center bg-success">
     <div class="container position-relative d-flex align-items-center justify-content-between">
       <a href="{{ url('/home') }}" class="logo d-flex align-items-center">
-        <h1 class="sitename">Cumana Grill</h1>
+        <h1 class="sitename">ORTIMED</h1>
         <span>.</span>
       </a>
 
@@ -56,6 +56,7 @@
           <li class="dropdown">
             <a href="#"><span>Transacciones</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>
+               
               <li><a href="{{ route('pagos.index') }}">Pagos</a></li>
               <li><a href="{{ route('cuentas-por-cobrar.index') }}">Cuentas Por Cobrar</a></li>
               <li><a href="{{ route('cuentas-por-pagar.index') }}">Cuentas Por Pagar</a></li>
@@ -67,6 +68,8 @@
           <li class="dropdown">
             <a href="#"><span>Administración</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
             <ul>
+               <li><a href="{{ route('mesas.index') }}">Mesas</a></li>
+                <li><a href="{{ route('mesas.create') }}">Nueva Mesa</a></li>
               <li><a href="{{ route('cajas.index') }}">Cajas</a></li>
               <li><a href="{{ route('caja.aperturas') }}">Aperturas</a></li>
               <li><a href="{{ route('caja.cierres') }}">Cierres</a></li>

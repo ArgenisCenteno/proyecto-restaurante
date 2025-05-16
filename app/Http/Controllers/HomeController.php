@@ -6,6 +6,7 @@ use App\Models\Categoria;
 use App\Models\Compra;
 use App\Models\CuentaPorCobrar;
 use App\Models\CuentaPorPagar;
+use App\Models\Mesa;
 use App\Models\Pago;
 use App\Models\Producto;
 use App\Models\Proveedor;
@@ -34,16 +35,17 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $ventas = Venta::whereDate('created_at', Carbon::today())->sum('monto_total');
-        $compras = Compra::whereDate('created_at', Carbon::today())->sum('monto_total');
+        $ventas = Venta::where('status', 'Pagado')->whereDate('created_at', Carbon::today())->sum('monto_total');
+        $compras = Compra::where('status', 'Pagado')->whereDate('created_at', Carbon::today())->sum('monto_total');
         $usuarios = User::count();
         $productos = Producto::count();
         $categorias = Categoria::count();
         $subcategorias = SubCategoria::count();
         $proveedores = Proveedor::count();
         $pagos = Pago::count();
-        $deudas = CuentaPorPagar::sum('monto');
-        $creditos = CuentaPorCobrar::sum('monto');
+        $deudas = CuentaPorPagar::where('estado', 'Pendiente')->sum('monto');
+        $creditos = CuentaPorCobrar::where('estado', 'Pendiente')->sum('monto');
+        $mesas = Mesa::with('ventaActiva')->get();
 
         $notificaciones = auth()->user()->unreadNotifications;
         function isConnected()
@@ -58,12 +60,12 @@ class HomeController extends Controller
 
         if (isConnected()) {
             $response = file_get_contents("https://ve.dolarapi.com/v1/dolares/oficial");
-          
+
         } else {
-             
+
             $response = false;
         }
- 
+
 
 
         // dd();
@@ -74,7 +76,7 @@ class HomeController extends Controller
             $dollar = 44.30;
         }
 
-        return view('home', compact('ventas', 'deudas','creditos','dollar', 'compras', 'notificaciones', 'proveedores', 'usuarios', 'productos', 'categorias', 'subcategorias', 'pagos'));
+        return view('home', compact('mesas', 'ventas', 'deudas', 'creditos', 'dollar', 'compras', 'notificaciones', 'proveedores', 'usuarios', 'productos', 'categorias', 'subcategorias', 'pagos'));
     }
 
 

@@ -1,4 +1,6 @@
 <?php
+
+use Database\Seeders\CategoriaSeeder;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use App\Models\User;
@@ -12,10 +14,15 @@ class DatabaseSeeder extends Seeder
         Role::create(['name' => 'superAdmin']);
         Role::create(['name' => 'empleado']);
         Role::create(['name' => 'cliente']);
-
+        $cliente = User::create([
+            'name' => 'CLIENTE GENERAL',
+            'email' => 'admin@gmail.com',
+            'password' => Hash::make('1234'),
+        ]);
+        $cliente->assignRole('cliente');
         // Crear usuarios y asignar roles
         $superAdmin = User::create([
-            'name' => 'Frank Ruiz',
+            'name' => 'Administrador',
             'email' => 'admin@gmail.com',
             'password' => Hash::make('1234'),
         ]);
@@ -23,16 +30,16 @@ class DatabaseSeeder extends Seeder
 
         $empleado = User::create([
             'name' => 'Empleado',
-            'email' => 'empleado@example.com',
+            'email' => 'empleado@gmail.com',
             'password' => Hash::make('1234'),
         ]);
         $empleado->assignRole('empleado');
 
-        $cliente = User::create([
-            'name' => 'Cliente',
-            'email' => 'cliente@example.com',
-            'password' => Hash::make('1234'),
+
+
+        // Llamar a otros seeders
+        $this->call([
+            CategoriaSeeder::class,
         ]);
-        $cliente->assignRole('cliente');
     }
 }

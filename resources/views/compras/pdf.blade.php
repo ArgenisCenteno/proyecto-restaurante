@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Cumana Grill</title>
+    <title> ORTIMED</title>
 
     <link rel="stylesheet" href="{{ public_path('css/bootstrap.min.css') }}"
         integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
@@ -40,7 +40,7 @@
                     </th>
                     <th colspan="2"
                         style="border-bottom: 2px solid #ddd; padding: 8px; text-align: center; font-size: 22px; font-weight: bold; width: 70%;">
-                        CUMANA GRILL C.A
+                       ORTIMED C.A
                     </th>
                     @php
                         $id = str_pad($compra->id, 8, "0", STR_PAD_LEFT);
@@ -67,9 +67,9 @@
             <tbody>
 
                 <tr>
-                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">CALLE AYACUCHO FRENTE AL CEMENTERIO DE
+                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">CALLE EZEQUIEL ZAMORA, FRENTE AL CENTRO CLINICO PUNTA DE MATA</td>
                         PUNTA DE MATA</td>
-                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">MONAGAS</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #ddd;">PUNTA DE MATA</td>
                     <td style="padding: 8px; border-bottom: 1px solid #ddd;">{{$fechacompra}}</td>
                 </tr>
             </tbody>
