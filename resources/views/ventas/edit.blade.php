@@ -145,7 +145,7 @@
                         <table class="table table-hover" id="productos-table2" style="width:100%">
                             <thead class="bg-light">
                                 <tr>
-                                    <th></th>
+                                    
                                     <th>Nombre</th>
                                     <th>Costo</th>
                                     <th>IVA</th>
@@ -188,17 +188,7 @@
                     headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                 },
                 columns: [
-                    {
-                        data: 'imagenes',
-                        name: 'imagenes',
-                        render: function (data) {
-                            return data.length > 0
-                                ? `<img src="${data[0].url}" alt="Imagen" style="width: 80px; height: auto;">`
-                                : 'Sin imagen';
-                        },
-                        orderable: false,
-                        searchable: false,
-                    },
+                     
                     { data: 'nombre', name: 'nombre' },
                     { data: 'precio_venta', name: 'precio_venta' },
                     {
