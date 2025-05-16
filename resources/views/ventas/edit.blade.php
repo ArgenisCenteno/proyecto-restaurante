@@ -140,6 +140,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
+                
                 <div class="modal-body">
                     <div class="table-responsive">
                         <table class="table table-hover" id="productos-table2" style="width:100%">
